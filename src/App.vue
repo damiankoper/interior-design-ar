@@ -1,18 +1,19 @@
 <template>
-  <div id="nav">
+  <!-- <div id="nav">
     <router-link to="/">Home</router-link> |
     <router-link to="/about">About</router-link>
-  </div>
+  </div> -->
   <router-view />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { IdarXR } from "./composables/webxr/IdarXR";
+//import { IdarXR } from "@/composables/webxr/IdarXR";
+
 export default defineComponent({
   setup() {
     // test
-    new IdarXR().init();
+    // new IdarXR().init();
   },
 });
 </script>
