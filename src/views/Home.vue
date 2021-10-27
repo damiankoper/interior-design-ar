@@ -1,106 +1,117 @@
 <template>
   <el-container>
     <el-main class="home">
-      <div class="home-main">
-        <el-row :gutter="24" align="middle" justify="center">
-          <el-col>
-            <el-image class="logo" fit="contain" :src="logoImg"></el-image>
-          </el-col>
-          <el-col>
-            <span>design the shit out of your room</span>
-          </el-col>
-        </el-row>
-        <div style="flex-grow: 1"></div>
-        <el-row :gutter="24" align="middle" justify="center">
-          <el-col>
-            <router-link to="/about">
-              <el-button type="primary">
-                <font-awesome-icon :icon="['fas', 'cubes']" /> Browse models
-              </el-button>
-            </router-link>
-          </el-col>
-          <el-col>
-            <el-button
-              type="primary"
-              @click="startAR"
-              :disabled="!isXrSupported"
-            >
-              <font-awesome-icon :icon="['fas', 'vr-cardboard']" />
-              {{ startARButtonLabel }}
+      <el-row>
+        <el-col :span="24">
+          <h1 class="logo">
+            <span>ID</span>
+            <span>AR</span>
+          </h1>
+          <span class="sublogo">design the shit out of your room</span>
+        </el-col>
+      </el-row>
+      <el-row>
+        <el-col :span="24">
+          <router-link to="/about">
+            <el-button type="primary">
+              <font-awesome-icon size="2x" :icon="['fas', 'cubes']" /> Browse
+              models
             </el-button>
-          </el-col>
-        </el-row>
-      </div>
+          </router-link>
+        </el-col>
+        <el-col :span="24">
+          <el-button type="primary" @click="startAR" :disabled="!isXrSupported">
+            <font-awesome-icon size="2x" :icon="['fas', 'vr-cardboard']" />
+            {{ isXrSupported ? "Design in AR" : "AR not supported" }}
+          </el-button>
+        </el-col>
+      </el-row>
     </el-main>
+
+    <!-- TODO: extract footer to component -->
+    <el-footer
+      height="32px"
+      style="background-color: white; display: flex; align-items: center"
+    >
+      Stopa
+    </el-footer>
+    <!-- TODO: extract footer to component -->
   </el-container>
 </template>
 
-<style lang="scss" scoped>
-%flexbox {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-}
-.home {
-  @extend %flexbox;
-  min-height: 97vh;
-  &-main {
-    @extend %flexbox;
-    max-width: 500px;
-    height: 100%;
-    padding: 15vh 0 15vh;
-    @media only screen and (orientation: landscape) and (min-height: 850px) {
-      padding: 20vh 0 20vh;
-    }
-    .logo {
-      max-width: 70%;
-    }
-    span {
-      @media only screen and (max-width: 640px) {
-        font-size: 3.7vw;
-      }
-      @media only screen and (min-width: 640px) {
-        font-size: 1.5rem;
-      }
-    }
-    .el-button {
-      width: 100%;
-      margin: 10px 0;
-      font-weight: 700;
-      font-size: 1.1rem;
-    }
-  }
-}
-</style>
-
 <script lang="ts">
-import { defineComponent, onMounted, computed } from "vue";
+import { defineComponent, onMounted } from "vue";
 import { useXR } from "@/composables/webxr/useXR";
-//import HelloWorld from "@/components/HelloWorld.vue"; // @ is an alias to /src
 
 export default defineComponent({
   name: "Home",
-  components: {
-    //HelloWorld,
-  },
+  components: {},
   setup() {
     const { isXrSupported, getXRSupport, startAR } = useXR();
-
-    const startARButtonLabel = computed(() =>
-      isXrSupported.value ? "Design in AR" : "AR not supported"
-    );
 
     onMounted(async () => {
       await getXRSupport();
     });
 
     return {
-      logoImg: require("@/assets/logo.svg"),
       startAR,
       isXrSupported,
-      startARButtonLabel,
     };
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.el-container {
+  background: rgb(110, 226, 245);
+  background: linear-gradient(
+    147deg,
+    rgb(255, 255, 255) 0%,
+    rgb(160, 204, 255) 100%
+  );
+}
+
+.home {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  height: calc(100vh - 32px);
+
+  .logo {
+    margin: 0;
+    line-height: 1;
+    font-size: 5rem;
+    span:first-child {
+      font-size: 3em;
+    }
+    span:last-child {
+      font-size: 0.75em;
+      position: relative;
+      left: -1.5rem;
+    }
+  }
+  .sublogo {
+    font-size: 1.35rem;
+    position: relative;
+    top: -2rem;
+  }
+
+  .el-button {
+    margin: 10px 0;
+    font-weight: 700;
+    font-size: 1.1em;
+    width: 100%;
+    max-width: 344px;
+    :deep(span) {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      svg {
+        width: 1em;
+        margin-right: 16px;
+      }
+    }
+  }
+}
+</style>
