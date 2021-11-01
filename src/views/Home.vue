@@ -7,7 +7,7 @@
             <span>ID</span>
             <span>AR</span>
           </h1>
-          <span class="sublogo">design the shit out of your room</span>
+          <span class="sublogo">interior design made easy for everyone</span>
         </el-col>
       </el-row>
       <el-row>
@@ -37,17 +37,20 @@
     </el-footer>
     <!-- TODO: extract footer to component -->
   </el-container>
+
+  <RootOverlay @close="stopAR" />
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted } from "vue";
 import { useXR } from "@/composables/webxr/useXR";
+import RootOverlay from "@/components/overlay/RootOverlay.vue";
 
 export default defineComponent({
   name: "Home",
-  components: {},
+  components: { RootOverlay },
   setup() {
-    const { isXrSupported, getXRSupport, startAR } = useXR();
+    const { isXrSupported, getXRSupport, startAR, stopAR } = useXR();
 
     onMounted(async () => {
       await getXRSupport();
@@ -55,6 +58,7 @@ export default defineComponent({
 
     return {
       startAR,
+      stopAR,
       isXrSupported,
     };
   },
@@ -92,7 +96,7 @@ export default defineComponent({
     }
   }
   .sublogo {
-    font-size: 1.35rem;
+    font-size: 1.08rem;
     position: relative;
     top: -2rem;
   }
