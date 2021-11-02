@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  node:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+  
+  localtunnel:
+    image: efrecon/localtunnel
+    command: 
+      --local-host node --port 8080
