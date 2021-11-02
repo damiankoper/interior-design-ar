@@ -12,7 +12,7 @@
       </el-row>
       <el-row>
         <el-col :span="24">
-          <router-link to="/about">
+          <router-link to="/browser">
             <el-button type="primary">
               <font-awesome-icon size="2x" :icon="['fas', 'cubes']" /> Browse
               models
@@ -27,15 +27,7 @@
         </el-col>
       </el-row>
     </el-main>
-
-    <!-- TODO: extract footer to component -->
-    <el-footer
-      height="32px"
-      style="background-color: white; display: flex; align-items: center"
-    >
-      Stopa
-    </el-footer>
-    <!-- TODO: extract footer to component -->
+    <Footer />
   </el-container>
 
   <RootOverlay @close="stopAR" :toastMessage="toastMessage" />
@@ -44,11 +36,12 @@
 <script lang="ts">
 import { defineComponent, onMounted, onUnmounted, ref } from "vue";
 import { useXR } from "@/composables/webxr/composables/useXR";
+import Footer from "@/components/Footer.vue";
 import RootOverlay from "@/components/overlay/RootOverlay.vue";
 
 export default defineComponent({
   name: "Home",
-  components: { RootOverlay },
+  components: { Footer, RootOverlay },
   setup() {
     const toastMessage = ref("");
     const { isXrSupported, getXRSupport, startAR, stopAR } =
@@ -78,7 +71,7 @@ export default defineComponent({
   background: linear-gradient(
     147deg,
     rgb(255, 255, 255) 0%,
-    rgb(160, 204, 255) 100%
+    rgb(174, 212, 255) 100%
   );
 }
 
