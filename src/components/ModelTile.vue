@@ -26,7 +26,6 @@ export default defineComponent({
   props: {
     model: { type: Object as PropType<IdSystem>, required: true },
   },
-
   setup(props) {
     const router = useRouter();
     const toastMessage = ref("");
