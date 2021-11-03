@@ -61,7 +61,7 @@ export class IdarXR {
     // Load a glTF resource
     loader.load(
       // resource URL
-      "models/SheenChair.glb",
+      "models/SheenChair/SheenChair.glb",
       // called when the resource is loaded
       (gltf) => {
         console.log(gltf.scene);
