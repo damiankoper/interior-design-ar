@@ -6,6 +6,7 @@
         display: none;
         flex-direction: column;
         justify-content: space-between;
+        pointer-events: none;
       "
     >
       <el-row justify="space-between" style="padding: 24px">
@@ -13,7 +14,11 @@
           <font-awesome-icon size="lg" :icon="['fas', 'times']" />
         </el-button>
         <div>
-          <el-button type="primary">
+          <el-button
+            type="primary"
+            v-if="sceneAvailable"
+            @click="$emit('loadScene')"
+          >
             <font-awesome-icon
               size="lg"
               :icon="['fas', 'cloud-download-alt']"
@@ -27,25 +32,59 @@
           </el-button>
         </div>
       </el-row>
-      <transition name="select">
-        <div class="object-select" v-if="objectMenu">
-          <div v-for="i in 10" :key="i" class="object-container">
-            <img src="/models/SheenChair/SheenChair.png" />
+      <div>
+        <el-row justify="center">
+          <transition name="el-fade-in">
+            <div class="toast" v-if="toastVisible">{{ toastMessage }}</div>
+          </transition>
+        </el-row>
+        <transition name="select">
+          <div class="object-select" v-if="objectMenu" v-loading="loading">
+            <div
+              v-for="i in 10"
+              :key="i"
+              class="object-container"
+              @click="$emit('select:model', i)"
+            >
+              <!-- TODO: iterate over props.objects when available -->
+              <!-- TODO: later model object instead of 'i' in $emit -->
+              <img src="/models/SheenChair/SheenChair.png" />
+            </div>
           </div>
-        </div>
-      </transition>
+        </transition>
+      </div>
     </div>
   </Teleport>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, PropType, ref, watch } from "vue";
 
 export default defineComponent({
-  emits: ["close"],
-  setup() {
+  props: {
+    sceneAvailable: { type: Boolean, default: false },
+    toastMessage: { type: String, default: "" },
+    loading: { type: Boolean, default: false },
+    objects: { type: Array as PropType<unknown>, default: () => [] },
+  },
+  emits: ["close", "select:model"],
+  setup(props) {
     const objectMenu = ref(false);
-    return { objectMenu };
+    const toastVisible = ref(false);
+    const toastTimeout = 5000;
+    let toastTimer: ReturnType<typeof setTimeout> | null = null;
+    watch(
+      () => props.toastMessage,
+      () => {
+        if (toastTimer) clearTimeout(toastTimer);
+        toastVisible.value = true;
+        toastTimer = setTimeout(
+          () => (toastVisible.value = false),
+          toastTimeout
+        );
+      }
+    );
+    return { objectMenu, toastVisible };
   },
 });
 </script>
@@ -58,6 +97,7 @@ export default defineComponent({
     height: $size;
     padding: 12px 0;
     opacity: 0.75;
+    pointer-events: all;
   }
   $height: 80px;
   $padding: 16px;
@@ -72,6 +112,7 @@ export default defineComponent({
     overflow-y: hidden;
     align-items: stretch;
     top: 0px;
+    will-change: top;
 
     &.select-enter-active {
       transition: top 0.3s ease-out;
@@ -97,12 +138,29 @@ export default defineComponent({
       border-radius: 4px;
       margin-right: 16px;
       transition: left 0.3s ease-out, opacity 0.3s ease-out;
+      will-change: left, opacity;
       transition-delay: 0.3s;
+      cursor: pointer;
+
+      pointer-events: all;
+
+      &:active {
+        background: #0d84ff;
+      }
 
       img {
         height: 100%;
       }
     }
+  }
+  .toast {
+    background-color: #ffffffc0;
+    border-radius: 999px;
+    padding: 8px 12px;
+    min-width: 60%;
+    max-width: 80%;
+    text-align: center;
+    margin-bottom: 48px;
   }
 }
 </style>

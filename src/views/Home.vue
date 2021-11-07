@@ -38,28 +38,35 @@
     <!-- TODO: extract footer to component -->
   </el-container>
 
-  <RootOverlay @close="stopAR" />
+  <RootOverlay @close="stopAR" :toastMessage="toastMessage" />
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted } from "vue";
-import { useXR } from "@/composables/webxr/useXR";
+import { defineComponent, onMounted, onUnmounted, ref } from "vue";
+import { useXR } from "@/composables/webxr/composables/useXR";
 import RootOverlay from "@/components/overlay/RootOverlay.vue";
 
 export default defineComponent({
   name: "Home",
   components: { RootOverlay },
   setup() {
-    const { isXrSupported, getXRSupport, startAR, stopAR } = useXR();
+    const toastMessage = ref("");
+    const { isXrSupported, getXRSupport, startAR, stopAR } =
+      useXR(toastMessage);
 
     onMounted(async () => {
       await getXRSupport();
+    });
+
+    onUnmounted(() => {
+      stopAR();
     });
 
     return {
       startAR,
       stopAR,
       isXrSupported,
+      toastMessage,
     };
   },
 });

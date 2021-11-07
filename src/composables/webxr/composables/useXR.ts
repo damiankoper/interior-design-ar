@@ -1,9 +1,10 @@
 import { ref, Ref } from "vue";
 import { Navigator } from "webxr";
 import { IdarXR } from "@/composables/webxr/IdarXR";
+import Container from "typedi";
 
-export function useXR() {
-  const idar = new IdarXR();
+export function useXR(toastMessage: Ref<string>) {
+  const idar = Container.get(IdarXR);
   const isXrSupported = ref(false);
 
   return {
@@ -13,11 +14,11 @@ export function useXR() {
       isXrSupported.value = await xr?.isSessionSupported("immersive-ar");
     },
     async startAR() {
-      await idar.init();
+      await idar.init(toastMessage);
       await idar.start();
     },
     async stopAR() {
-      await idar.stop();
+      await idar.destroy();
     },
   };
 }
