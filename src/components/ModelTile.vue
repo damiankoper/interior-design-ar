@@ -1,24 +1,45 @@
 <template>
   <div>
     <el-image fit="contain" :src="imageSrc"></el-image>
-    <el-button :class="isXrSupported ? '' : 'hidden'" type="primary" plain>
+    <el-button
+      @click="startAR"
+      :class="isXrSupported ? '' : 'hidden'"
+      type="primary"
+      plain
+    >
       <font-awesome-icon :icon="['fas', 'vr-cardboard']" />
     </el-button>
   </div>
+  <RootOverlay @close="stopAR" :toastMessage="toastMessage" />
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
-// import { useXR } from "@/composables/webxr/composables/useXR";
+import { defineComponent, onMounted, onUnmounted, ref } from "vue";
+import { useXR } from "@/composables/webxr/composables/useXR";
+import RootOverlay from "@/components/overlay/RootOverlay.vue";
 
 export default defineComponent({
+  components: { RootOverlay },
   setup() {
     const imageSrc = ref("models/SheenChair/SheenChair.png");
-    // const { isXrSupported } = useXR();
+    const toastMessage = ref("");
+    const { isXrSupported, getXRSupport, startAR, stopAR } =
+      useXR(toastMessage);
+
+    onMounted(async () => {
+      await getXRSupport();
+    });
+
+    onUnmounted(() => {
+      stopAR();
+    });
 
     return {
       imageSrc,
-      isXrSupported: true, // TODO remove assignment
+      startAR,
+      stopAR,
+      isXrSupported,
+      toastMessage,
     };
   },
 });

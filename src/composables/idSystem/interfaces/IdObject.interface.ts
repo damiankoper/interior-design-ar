@@ -1,8 +1,8 @@
-export interface IdObject {
-  getName(): string;
-  getDescription(): string;
+import { ModelMetaData } from "./modelMetaData.interface";
 
-  load(): void;
+export interface IdObject {
+  load(): Promise<void>;
   purge(): void;
-  getModel(): THREE.Group;
+  getModel(): THREE.Group | null;
+  getModelMetaData(): ModelMetaData;
 }
