@@ -13,6 +13,12 @@ const routes: Array<RouteRecordRaw> = [
     component: () =>
       import(/* webpackChunkName: "browser" */ "@/views/ModelBrowser.vue"),
   },
+  {
+    path: "/browser/:modelName",
+    name: "Model details",
+    component: () =>
+      import(/* webpackChunkName: "browser" */ "@/views/ModelDetails.vue"),
+  },
 ];
 
 const router = createRouter({
