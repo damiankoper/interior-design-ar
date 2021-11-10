@@ -1,8 +1,8 @@
 <template>
-  <div>
+  <div @click="openModelDetails()">
     <el-image fit="contain" :src="imageSrc"></el-image>
     <el-button
-      @click="startAR"
+      @click.stop="startAR"
       :class="isXrSupported ? '' : 'hidden'"
       type="primary"
       plain
@@ -14,17 +14,29 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, ref } from "vue";
-import { useXR } from "@/composables/webxr/composables/useXR";
+import { defineComponent, onMounted, onUnmounted, ref, PropType } from "vue";
+import { useRouter } from "vue-router";
+
 import RootOverlay from "@/components/overlay/RootOverlay.vue";
+
+import { useXR } from "@/composables/webxr/composables/useXR";
+import { IdObject } from "@/composables/idSystem/interfaces/IdObject.interface";
 
 export default defineComponent({
   components: { RootOverlay },
-  setup() {
-    const imageSrc = ref("models/SheenChair/SheenChair.png");
+  props: {
+    model: { type: Object as PropType<IdObject>, required: true },
+  },
+  setup(props) {
+    const router = useRouter();
     const toastMessage = ref("");
     const { isXrSupported, getXRSupport, startAR, stopAR } =
       useXR(toastMessage);
+    const modelMetaData = props.model.getModelMetaData();
+    const imageSrc = modelMetaData.modelImagePath;
+
+    const openModelDetails = () =>
+      router.push({ path: `/browser/${modelMetaData.id}` });
 
     onMounted(async () => {
       await getXRSupport();
@@ -35,6 +47,7 @@ export default defineComponent({
     });
 
     return {
+      openModelDetails,
       imageSrc,
       startAR,
       stopAR,
@@ -47,6 +60,7 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 div {
+  cursor: pointer;
   position: relative;
   .el-image {
     width: 100%;

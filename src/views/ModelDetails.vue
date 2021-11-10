@@ -1,62 +1,72 @@
 <template>
   <el-container>
     <el-main>
-      <el-image fit="contain" :src="model.imageSrc" />
+      <el-image fit="contain" :src="modelMetaData.modelImagePath" />
       <el-row align="middle">
         <el-col :span="18">
-          <h1>{{ model.name }}</h1>
+          <h1>{{ modelMetaData.name }}</h1>
         </el-col>
         <el-col :span="6">
-          <el-button type="primary" plain>
+          <el-button
+            @click="startAR"
+            :class="isXrSupported ? '' : 'hidden'"
+            type="primary"
+            plain
+          >
             <font-awesome-icon :icon="['fas', 'vr-cardboard']" />
           </el-button>
         </el-col>
         <el-col>
           <p class="desc">
-            {{ model.description }}
+            {{ modelMetaData.description }}
           </p>
         </el-col>
       </el-row>
     </el-main>
     <Footer />
   </el-container>
+  <RootOverlay @close="stopAR" :toastMessage="toastMessage" />
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, reactive } from "vue";
+import { defineComponent, inject, ref, onMounted, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
+import { ModelsRefInjectKey } from "@/symbols";
+
 import Footer from "@/components/Footer.vue";
-import models from "@/assets/models.json";
+import RootOverlay from "@/components/overlay/RootOverlay.vue";
+
+import { useXR } from "@/composables/webxr/composables/useXR";
 
 export default defineComponent({
   name: "Model Details",
-  components: { Footer },
+  components: { Footer, RootOverlay },
   setup() {
     const route = useRoute();
-    const model = reactive({ name: "", description: "", imageSrc: "" });
+    const models = inject(ModelsRefInjectKey)?.value;
+    const model = models?.find(
+      (m) => m.getModelMetaData().id === route.params.modelId
+    );
+    const modelMetaData = model?.getModelMetaData();
 
-    onMounted(() => {
-      const modelName = route.params.modelName as string;
+    const toastMessage = ref("");
+    const { isXrSupported, getXRSupport, startAR, stopAR } =
+      useXR(toastMessage);
 
-      const modelInfo = models.find(
-        (mdl) =>
-          mdl.id.localeCompare(modelName, undefined, {
-            sensitivity: "base",
-          }) === 0
-      );
+    onMounted(async () => {
+      await getXRSupport();
+    });
 
-      if (modelInfo) {
-        // TODO display model info
-        model.name = modelInfo.name;
-        model.description = modelInfo.description;
-        model.imageSrc = `/models/${modelInfo.id}/${modelInfo.id}.png`;
-      } else {
-        // TODO display not found page
-      }
+    onUnmounted(() => {
+      stopAR();
     });
 
     return {
-      model,
+      modelMetaData,
+      startAR,
+      stopAR,
+      isXrSupported,
+      toastMessage,
     };
   },
 });
@@ -88,6 +98,9 @@ export default defineComponent({
 
   p.desc {
     text-align: justify;
+  }
+  .hidden {
+    display: none;
   }
 }
 </style>

@@ -2,6 +2,16 @@
   {
     "id": "SheenChair",
     "name": "Sheen Chair",
-    "description": "Actually kickstarter shaman venmo VHS tilde biodiesel. Salvia craft beer austin artisan sartorial hashtag pickled iPhone pitchfork. Salvia cred coloring book pop-up, master cleanse chia ennui. Seitan yr gentrify truffaut enamel pin venmo. Pinterest vice hella venmo umami lomo."
+    "description": "A realy comfy and cozy chair."
+  },
+  {
+    "id": "SheenChair",
+    "name": "Sheen Chair 1",
+    "description": "Not so cozy anymore."
+  },
+  {
+    "id": "SheenChair",
+    "name": "Sheen Chair 2",
+    "description": "Won't sit on this!"
   }
 ]

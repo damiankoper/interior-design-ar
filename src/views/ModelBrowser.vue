@@ -34,8 +34,14 @@
     </el-header>
     <el-main>
       <el-row :gutter="10">
-        <el-col :span="6" :xs="12" :lg="4" v-for="n in 51" :key="n">
-          <ModelTile></ModelTile>
+        <el-col
+          :span="6"
+          :xs="12"
+          :lg="4"
+          v-for="(model, index) in modelsRef"
+          :key="index"
+        >
+          <ModelTile :model="model"></ModelTile>
         </el-col>
       </el-row>
     </el-main>
@@ -44,16 +50,20 @@
 </template>
 
 <script lang="ts">
+import { defineComponent, ref, inject } from "vue";
+import { ModelsRefInjectKey } from "@/symbols";
+
 import Footer from "@/components/Footer.vue";
 import ModelTile from "@/components/ModelTile.vue";
-import { defineComponent, ref } from "vue";
 
 export default defineComponent({
   components: { Footer, ModelTile },
   setup() {
     const searchValue = ref("");
+    const modelsRef = inject(ModelsRefInjectKey);
 
     return {
+      modelsRef,
       searchValue,
     };
   },

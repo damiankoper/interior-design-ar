@@ -1,4 +1,4 @@
-import { ModelMetaData } from "./modelMetaData.interface";
+import { ModelMetaData } from "./ModelMetaData.interface";
 
 export interface IdObject {
   load(): Promise<void>;

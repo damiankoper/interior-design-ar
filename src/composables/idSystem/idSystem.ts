@@ -1,11 +1,12 @@
-import { IdObject, ModelMetaData } from "./interfaces/IdObject.interface";
+import { IdObject } from "./interfaces/IdObject.interface";
+import { ModelMetaData } from "./interfaces/ModelMetaData.interface";
 
 export class IdSystem implements IdObject {
-  private _modelMetaData: ModelMetaData;
+  private _metaData: ModelMetaData;
   private _model: THREE.Group | null = null;
 
   constructor(modelMetaData: ModelMetaData) {
-    this._modelMetaData = modelMetaData;
+    this._metaData = modelMetaData;
   }
 
   public getModel(): THREE.Group | null {
@@ -13,7 +14,7 @@ export class IdSystem implements IdObject {
   }
 
   public getModelMetaData(): ModelMetaData {
-    return this._modelMetaData;
+    return this._metaData;
   }
 
   public load(): Promise<void> {

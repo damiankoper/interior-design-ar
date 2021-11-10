@@ -14,7 +14,7 @@ const routes: Array<RouteRecordRaw> = [
       import(/* webpackChunkName: "browser" */ "@/views/ModelBrowser.vue"),
   },
   {
-    path: "/browser/:modelName",
+    path: "/browser/:modelId",
     name: "Model details",
     component: () =>
       import(/* webpackChunkName: "browser" */ "@/views/ModelDetails.vue"),
