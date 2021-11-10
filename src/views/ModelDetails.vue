@@ -25,46 +25,35 @@
     </el-main>
     <Footer />
   </el-container>
-  <RootOverlay @close="stopAR" :toastMessage="toastMessage" />
 </template>
 
 <script lang="ts">
-import { defineComponent, inject, ref, onMounted, onUnmounted } from "vue";
+import { computed, defineComponent, inject, ref } from "vue";
 import { useRoute } from "vue-router";
 import { ModelsRefInjectKey } from "@/symbols";
 
 import Footer from "@/components/Footer.vue";
-import RootOverlay from "@/components/overlay/RootOverlay.vue";
 
 import { useXR } from "@/composables/webxr/composables/useXR";
 
 export default defineComponent({
   name: "Model Details",
-  components: { Footer, RootOverlay },
+  components: { Footer },
   setup() {
     const route = useRoute();
     const models = inject(ModelsRefInjectKey)?.value;
-    const model = models?.find(
-      (m) => m.getModelMetaData().id === route.params.modelId
+    const modelMetaData = computed(() =>
+      models
+        ?.find((m) => m.getModelMetaData().id === route.params.modelId)
+        ?.getModelMetaData()
     );
-    const modelMetaData = model?.getModelMetaData();
 
     const toastMessage = ref("");
-    const { isXrSupported, getXRSupport, startAR, stopAR } =
-      useXR(toastMessage);
-
-    onMounted(async () => {
-      await getXRSupport();
-    });
-
-    onUnmounted(() => {
-      stopAR();
-    });
+    const { isXrSupported, startAR } = useXR(toastMessage);
 
     return {
       modelMetaData,
       startAR,
-      stopAR,
       isXrSupported,
       toastMessage,
     };
