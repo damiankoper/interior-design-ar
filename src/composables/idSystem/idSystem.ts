@@ -1,7 +1,6 @@
-import { IdObject } from "./interfaces/IdObject.interface";
 import { ModelMetaData } from "./interfaces/ModelMetaData.interface";
 
-export class IdSystem implements IdObject {
+export class IdSystem {
   private _metaData: ModelMetaData;
   private _model: THREE.Group | null = null;
 

@@ -17,11 +17,11 @@ import { defineComponent, ref, PropType } from "vue";
 import { useRouter } from "vue-router";
 
 import { useXR } from "@/composables/webxr/composables/useXR";
-import { IdObject } from "@/composables/idSystem/interfaces/IdObject.interface";
+import { IdSystem } from "@/composables/idSystem/IdSystem";
 
 export default defineComponent({
   props: {
-    model: { type: Object as PropType<IdObject>, required: true },
+    model: { type: Object as PropType<IdSystem>, required: true },
   },
   setup(props) {
     const router = useRouter();

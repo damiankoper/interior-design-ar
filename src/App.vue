@@ -7,12 +7,11 @@ import { defineComponent, provide, ref } from "vue";
 import { ModelsRefInjectKey } from "./symbols";
 import modelsMetaJson from "./assets/models.json";
 
-import { IdSystem } from "./composables/idSystem/idSystem";
-import { IdObject } from "./composables/idSystem/interfaces/IdObject.interface";
+import { IdSystem } from "./composables/idSystem/IdSystem";
 
 export default defineComponent({
   setup() {
-    const idObjects: IdObject[] = modelsMetaJson.map((modelMeta) => {
+    const idOSystems: IdSystem[] = modelsMetaJson.map((modelMeta) => {
       const modelPath = `/models/${modelMeta.id}/${modelMeta.id}`;
       return new IdSystem({
         ...modelMeta,
@@ -20,7 +19,7 @@ export default defineComponent({
         webGlModelPath: `${modelPath}.glb`,
       });
     });
-    const models = ref<IdObject[]>(idObjects);
+    const models = ref<IdSystem[]>(idOSystems);
     provide(ModelsRefInjectKey, models);
   },
 });
