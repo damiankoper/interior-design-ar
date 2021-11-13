@@ -4,6 +4,7 @@ import { OverlayXRService } from "./OverlayXR.service";
 import { SessionLifecycle } from "../interfaces/SessionLifecycle.interface";
 import { HitTestXRService } from "./HitTestXR.service";
 import { ServiceLifecycle } from "../interfaces/ServiceLifecycle.interface";
+import { LightXRService } from "./LightXR.service";
 
 @Service()
 export class SceneXRService implements ServiceLifecycle {
@@ -35,7 +36,8 @@ export class SceneXRService implements ServiceLifecycle {
 
   constructor(
     public overlayService: OverlayXRService,
-    public hitTestService: HitTestXRService
+    public hitTestService: HitTestXRService,
+    public lightService: LightXRService
   ) {}
 
   public addLifecycleObject(object: SessionLifecycle) {
@@ -48,6 +50,7 @@ export class SceneXRService implements ServiceLifecycle {
       powerPreference: "high-performance",
     });
     this._renderer.xr.enabled = true;
+    this._renderer.physicallyCorrectLights = true;
     this._renderer.xr.setReferenceSpaceType("local");
     this._scene = new THREE.Scene();
     this._camera = new THREE.PerspectiveCamera(
@@ -56,8 +59,8 @@ export class SceneXRService implements ServiceLifecycle {
       0.1,
       1000
     );
-    const light = new THREE.AmbientLight("white");
-    this._scene.add(light);
+
+    this.lightService.init(this._renderer, this._scene);
 
     this._controller = this._renderer.xr.getController(0);
     this.scene.add(this._controller);
@@ -75,6 +78,7 @@ export class SceneXRService implements ServiceLifecycle {
   }
 
   public async destroy(): Promise<void> {
+    this.lightService.destroy();
     this.lifecycleObjects.forEach((o) => o.destroy(this.scene));
     this.scene.clear();
   }

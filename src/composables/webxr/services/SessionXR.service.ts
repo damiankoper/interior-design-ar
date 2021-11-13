@@ -14,6 +14,7 @@ export class SessionXRService implements ServiceLifecycle {
     "local",
     "anchors",
     "hit-test",
+    "light-estimation",
   ];
 
   private _session?: XRSession;

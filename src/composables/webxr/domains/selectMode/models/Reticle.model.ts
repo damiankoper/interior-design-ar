@@ -9,7 +9,10 @@ export class Reticle implements SessionLifecycle {
   public init(scene: THREE.Scene): void {
     const geometry = new THREE.CircleBufferGeometry(0.15, 32);
     geometry.rotateX(-Math.PI / 2);
-    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const material = new THREE.MeshPhongMaterial({
+      color: 0x00ff00,
+      reflectivity: 0.75,
+    });
     this.model = new THREE.Mesh(geometry, material);
     this.model.matrixAutoUpdate = false;
     scene.add(this.model);
@@ -32,6 +35,13 @@ export class Reticle implements SessionLifecycle {
 
   public destroy(scene: THREE.Scene): void {
     if (!this.model) return;
+
+    if (this.model.material instanceof THREE.Material)
+      this.model.material.dispose();
+
+    if (this.model.geometry instanceof THREE.BufferGeometry)
+      this.model.geometry.dispose();
+
     scene.remove(this.model);
   }
 }
