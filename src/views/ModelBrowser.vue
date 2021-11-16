@@ -21,7 +21,11 @@
           :md="{ span: 12, offset: 8 }"
           :xl="{ span: 8, offset: 13 }"
         >
-          <el-input v-model="searchValue" placeholder="Search for model">
+          <el-input
+            v-model="searchValue"
+            placeholder="Search for model"
+            clearable
+          >
             <template #prefix>
               <font-awesome-icon
                 style="margin-left: 5px"
