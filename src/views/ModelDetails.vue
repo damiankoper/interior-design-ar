@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-main>
+    <el-main v-if="modelMetaData">
       <el-image fit="contain" :src="modelMetaData.modelImagePath" />
       <el-row align="middle">
         <el-col :span="18">
@@ -23,6 +23,7 @@
         </el-col>
       </el-row>
     </el-main>
+    <p class="not-found" v-else>Requested model was not found</p>
     <Footer />
   </el-container>
 </template>
@@ -41,10 +42,10 @@ export default defineComponent({
   components: { Footer },
   setup() {
     const route = useRoute();
-    const models = inject(ModelsRefInjectKey)?.value;
+    const models = inject(ModelsRefInjectKey);
     const modelMetaData = computed(() =>
-      models
-        ?.find((m) => m.getModelMetaData().id === route.params.modelId)
+      models?.value
+        .find((m) => m.getModelMetaData().id === route.params.modelId)
         ?.getModelMetaData()
     );
 
@@ -55,7 +56,6 @@ export default defineComponent({
       modelMetaData,
       startAR,
       isXrSupported,
-      toastMessage,
     };
   },
 });
@@ -91,5 +91,12 @@ export default defineComponent({
   .hidden {
     display: none;
   }
+}
+
+.not-found {
+  text-align: center;
+  width: 100%;
+  margin-top: 100px;
+  font-size: 2rem;
 }
 </style>
