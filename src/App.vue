@@ -4,10 +4,10 @@
 
 <script lang="ts">
 import { defineComponent, provide, ref } from "vue";
-import { ModelsRefInjectKey } from "./symbols";
-import modelsMetaJson from "./assets/models.json";
+import { ModelsRefInjectKey } from "@/symbols";
+import modelsMetaJson from "@/assets/models.json";
 
-import { IdSystem } from "./composables/idSystem/IdSystem";
+import { IdSystem } from "@/composables/idSystem/idSystem";
 
 export default defineComponent({
   setup() {

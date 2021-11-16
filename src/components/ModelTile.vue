@@ -3,7 +3,7 @@
     <el-image fit="contain" :src="imageSrc"></el-image>
     <el-button
       @click.stop="startAR"
-      :class="isXrSupported ? '' : 'hidden'"
+      :class="{ hidden: !isXrSupported }"
       type="primary"
       plain
     >
@@ -23,6 +23,7 @@ export default defineComponent({
   props: {
     model: { type: Object as PropType<IdSystem>, required: true },
   },
+
   setup(props) {
     const router = useRouter();
     const toastMessage = ref("");
@@ -50,6 +51,7 @@ div {
   position: relative;
   .el-image {
     width: 100%;
+    box-shadow: var(--el-box-shadow-base);
   }
   .el-button {
     position: absolute;

@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <el-header>
+    <el-header :style="headerStyle">
       <el-row :gutter="10">
         <el-col :xs="4" :span="2" :xl="1">
           <router-link to="/">
@@ -41,7 +41,7 @@
           v-for="(model, index) in modelsRef"
           :key="index"
         >
-          <ModelTile :model="model"></ModelTile>
+          <ModelTile class="model-tile" :model="model"></ModelTile>
         </el-col>
       </el-row>
     </el-main>
@@ -50,21 +50,33 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, inject } from "vue";
+import { defineComponent, ref, inject, computed } from "vue";
 import { ModelsRefInjectKey } from "@/symbols";
 
 import Footer from "@/components/Footer.vue";
 import ModelTile from "@/components/ModelTile.vue";
+import { useWindowScroll } from "@/composables/useWindowScroll";
 
 export default defineComponent({
   components: { Footer, ModelTile },
   setup() {
     const searchValue = ref("");
     const modelsRef = inject(ModelsRefInjectKey);
+    const { isWindowScrolledToTop } = useWindowScroll();
+
+    const headerStyle = computed(() => {
+      return {
+        boxShadow: isWindowScrolledToTop.value
+          ? "none"
+          : "0 8px 5px -5px rgb(0 0 0 / 0.4)",
+        transition: "box-shadow 0.4s",
+      };
+    });
 
     return {
       modelsRef,
       searchValue,
+      headerStyle,
     };
   },
 });
@@ -103,18 +115,19 @@ export default defineComponent({
 }
 
 .el-main {
-  --el-main-padding: 60px 10px 32px;
+  --el-main-padding: 70px 10px 32px;
   @media only screen and (min-width: 1200px) {
-    --el-main-padding: 60px 200px 32px;
+    --el-main-padding: 70px 200px 32px;
   }
   background-color: rgb(245, 245, 245);
   display: flex;
   flex-flow: row wrap;
   justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+
   .model-tile {
-    min-width: 100px;
-    max-width: 40%;
-    margin: 10px 10px;
+    margin-bottom: 6px;
   }
 }
 </style>
