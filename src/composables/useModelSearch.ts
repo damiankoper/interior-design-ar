@@ -29,7 +29,11 @@ export function useModelSearch() {
 
   const router = useRouter();
   const onSelect = (modelMetaData: ModelMetaData) => {
-    router.push({ path: `/browser/${modelMetaData.id}` });
+    if (router.currentRoute.value.name === "Model details") {
+      router.replace({ path: `/browser/${modelMetaData.id}` });
+    } else {
+      router.push({ path: `/browser/${modelMetaData.id}` });
+    }
   };
 
   return {
