@@ -83,6 +83,7 @@ export default defineComponent({
   height: calc(100vh - 32px);
 
   .logo {
+    user-select: none;
     margin: 0;
     line-height: 1;
     font-size: 5rem;
@@ -96,6 +97,7 @@ export default defineComponent({
     }
   }
   .sublogo {
+    user-select: none;
     font-size: 1.08rem;
     position: relative;
     top: -2rem;

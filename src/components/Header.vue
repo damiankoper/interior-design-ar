@@ -7,10 +7,12 @@
         </el-button>
       </el-col>
       <el-col class="hidden-sm-and-down" :span="2">
-        <h1 class="logo">
-          <span>ID</span>
-          <span>AR</span>
-        </h1>
+        <router-link class="no-link" to="/">
+          <h1 class="logo">
+            <span>ID</span>
+            <span>AR</span>
+          </h1>
+        </router-link>
       </el-col>
       <el-col
         :span="22"
@@ -18,10 +20,31 @@
         :md="{ span: 12, offset: 8 }"
         :xl="{ span: 8, offset: 13 }"
       >
-        <el-input
-          v-model="searchValue"
+        <el-autocomplete
+          v-if="useAutocomplete"
+          style="display: block"
           placeholder="Search for model"
           clearable
+          v-model="searchValue"
+          :fetch-suggestions="querySearch"
+          @select="onSelect"
+        >
+          <template #prefix>
+            <font-awesome-icon
+              style="margin-left: 5px"
+              :icon="['fas', 'search']"
+            />
+          </template>
+          <template #default="{ item }">
+            <div class="value">{{ item.name }}</div>
+          </template>
+        </el-autocomplete>
+        <el-input
+          v-else
+          placeholder="Search for model"
+          clearable
+          v-model="searchValue"
+          @input="onFilterInput"
         >
           <template #prefix>
             <font-awesome-icon
@@ -36,14 +59,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from "vue";
+import { defineComponent, computed } from "vue";
 import { useRouter } from "vue-router";
+import { debounce } from "lodash";
 import { useWindowScroll } from "@/composables/useWindowScroll";
+import { useModelSearch } from "@/composables/useModelSearch";
 
 export default defineComponent({
-  setup() {
-    const searchValue = ref("");
-
+  props: {
+    useAutocomplete: Boolean,
+  },
+  emits: ["filterChange"],
+  setup(props, { emit }) {
     const router = useRouter();
     const onBack = () => {
       router.back();
@@ -59,10 +86,20 @@ export default defineComponent({
       };
     });
 
+    const { searchValue, querySearch, onSelect } = useModelSearch();
+
+    const onFilterInput = debounce((searchValue) => {
+      emit("filterChange", searchValue);
+    }, 1000);
+
     return {
-      searchValue,
+      ...props,
       onBack,
       headerStyle,
+      searchValue,
+      querySearch,
+      onSelect,
+      onFilterInput,
     };
   },
 });
@@ -86,6 +123,7 @@ export default defineComponent({
   }
 
   .logo {
+    user-select: none;
     margin: -5px 0 0;
     line-height: 1;
     font-size: 1.1rem;
@@ -97,6 +135,14 @@ export default defineComponent({
       position: relative;
       left: -0.3rem;
     }
+  }
+
+  .no-link {
+    border: none;
+    outline: none;
+    text-decoration: none;
+    color: inherit;
+    -webkit-tap-highlight-color: white;
   }
 }
 </style>

@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <Header />
+    <Header :useAutocomplete="true" />
     <el-main v-if="modelMetaData">
       <el-image fit="contain" :src="modelMetaData.modelImagePath" />
       <el-row align="middle">
@@ -48,9 +48,9 @@ export default defineComponent({
   components: { Header, Footer },
   setup() {
     const route = useRoute();
-    const models = inject(ModelsRefInjectKey);
+    const models = inject(ModelsRefInjectKey, ref([]));
     const modelMetaData = computed(() =>
-      models?.value
+      models.value
         .find((m) => m.getModelMetaData().id === route.params.modelId)
         ?.getModelMetaData()
     );

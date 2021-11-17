@@ -49,16 +49,25 @@ export default defineComponent({
 div {
   cursor: pointer;
   position: relative;
+
   .el-image {
     width: 100%;
     box-shadow: var(--el-box-shadow-base);
+    transition: all 200ms ease-out;
   }
+
+  .el-image:hover {
+    box-shadow: 0 2px 4px 2px rgba(0, 0, 0, 0.12),
+      0 0 6px 8px rgba(0, 0, 0, 0.04);
+  }
+
   .el-button {
     position: absolute;
     bottom: 5%;
     right: 5%;
     padding: 6px 10.25px;
   }
+
   .hidden {
     display: none;
   }
