@@ -7,7 +7,7 @@ import { defineComponent, provide, ref } from "vue";
 import { ModelsRefInjectKey } from "@/symbols";
 import modelsMetaJson from "@/assets/models.json";
 
-import { IdSystem } from "@/composables/idSystem/idSystem";
+import { IdSystem } from "@/composables/idSystem/IdSystem";
 
 export default defineComponent({
   setup() {
