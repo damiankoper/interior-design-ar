@@ -1,13 +1,13 @@
 import { ref, computed, inject } from "vue";
 import { useRouter } from "vue-router";
 import type { ModelMetaData } from "@/composables/idSystem/interfaces/ModelMetaData.interface";
-import { ModelsRefInjectKey } from "@/symbols";
+import { IdSystemsInjectKey } from "@/symbols";
 
 export function useModelSearch() {
   const searchValue = ref("");
-  const xmodels = inject(ModelsRefInjectKey, ref([]));
+  const xmodels = inject(IdSystemsInjectKey, []);
   const metaModels = computed(() =>
-    xmodels.value.map((model) => model.getModelMetaData())
+    xmodels.map((model) => model.getModelMetaData())
   );
 
   const querySearch = (

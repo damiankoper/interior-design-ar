@@ -20,7 +20,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed, inject } from "vue";
-import { ModelsRefInjectKey } from "@/symbols";
+import { IdSystemsInjectKey } from "@/symbols";
 
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
@@ -29,10 +29,10 @@ import ModelTile from "@/components/ModelTile.vue";
 export default defineComponent({
   components: { Header, Footer, ModelTile },
   setup() {
-    const models = inject(ModelsRefInjectKey, ref([]));
+    const models = inject(IdSystemsInjectKey, []);
 
     const modelsFiltered = computed(() => {
-      return models.value.filter(
+      return models.filter(
         (model) =>
           !filter.value ||
           model.getModelMetaData().name.toLowerCase().includes(filter.value)

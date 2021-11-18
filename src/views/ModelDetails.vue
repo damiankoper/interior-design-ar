@@ -37,7 +37,7 @@
 <script lang="ts">
 import { computed, defineComponent, inject, ref } from "vue";
 import { useRoute } from "vue-router";
-import { ModelsRefInjectKey } from "@/symbols";
+import { IdSystemsInjectKey } from "@/symbols";
 
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
@@ -48,9 +48,9 @@ export default defineComponent({
   components: { Header, Footer },
   setup() {
     const route = useRoute();
-    const models = inject(ModelsRefInjectKey, ref([]));
+    const models = inject(IdSystemsInjectKey, []);
     const modelMetaData = computed(() =>
-      models.value
+      models
         .find((m) => m.getModelMetaData().id === route.params.modelId)
         ?.getModelMetaData()
     );

@@ -3,15 +3,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, provide, ref } from "vue";
-import { ModelsRefInjectKey } from "@/symbols";
+import { defineComponent, provide } from "vue";
+import { IdSystemsInjectKey } from "@/symbols";
 import modelsMetaJson from "@/assets/models.json";
 
 import { IdSystem } from "@/composables/idSystem/IdSystem";
 
 export default defineComponent({
   setup() {
-    const idOSystems: IdSystem[] = modelsMetaJson.map((modelMeta) => {
+    const idSystems: IdSystem[] = modelsMetaJson.map((modelMeta) => {
       const modelPath = `/models/${modelMeta.id}/${modelMeta.id}`;
       return new IdSystem({
         ...modelMeta,
@@ -19,8 +19,7 @@ export default defineComponent({
         webGlModelPath: `${modelPath}.glb`,
       });
     });
-    const models = ref<IdSystem[]>(idOSystems);
-    provide(ModelsRefInjectKey, models);
+    provide(IdSystemsInjectKey, idSystems);
   },
 });
 </script>
