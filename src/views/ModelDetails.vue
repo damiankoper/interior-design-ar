@@ -1,11 +1,11 @@
 <template>
   <el-container>
     <Header :useAutocomplete="true" />
-    <el-main v-if="modelMetaData">
-      <el-image fit="contain" :src="modelMetaData.modelImagePath" />
+    <el-main v-if="model">
+      <div ref="viewParentDiv"></div>
       <el-row align="middle">
         <el-col :span="20" :xl="24">
-          <h1>{{ modelMetaData.name }}</h1>
+          <h1>{{ model.getModelMetaData().name }}</h1>
         </el-col>
         <el-col class="hidden-xl-only" :span="4">
           <el-button
@@ -19,7 +19,7 @@
         </el-col>
         <el-col>
           <p class="desc">
-            {{ modelMetaData.description }}
+            {{ model.getModelMetaData().description }}
           </p>
         </el-col>
       </el-row>
@@ -42,6 +42,7 @@ import { IdSystemsInjectKey } from "@/symbols";
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
 import { useXR } from "@/composables/webxr/composables/useXR";
+import { useModelViewer } from "@/composables/modelViewer/composables/useModelViewer";
 
 export default defineComponent({
   name: "Model Details",
@@ -49,17 +50,22 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const models = inject(IdSystemsInjectKey, []);
-    const modelMetaData = computed(() =>
-      models
-        .find((m) => m.getModelMetaData().id === route.params.modelId)
-        ?.getModelMetaData()
+    const model = computed(
+      () =>
+        models.find((m) => m.getModelMetaData().id === route.params.modelId) ??
+        null
     );
 
     const toastMessage = ref("");
     const { isXrSupported, startAR } = useXR(toastMessage);
 
+    const viewParentDiv = ref<HTMLDivElement | null>(null);
+
+    useModelViewer(viewParentDiv, model);
+
     return {
-      modelMetaData,
+      viewParentDiv,
+      model,
       startAR,
       isXrSupported,
     };

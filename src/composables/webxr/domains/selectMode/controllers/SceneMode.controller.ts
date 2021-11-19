@@ -20,8 +20,8 @@ export enum SceneMode {
 @Service()
 export class SceneModeController implements SessionLifecycle {
   private mode: SceneMode = SceneMode.VIEW;
-  private selectIdSystem: IdSystem | null = null; // TODO: IdSystem
-  private selectObject: THREE.Object3D | null = null; // TODO: IdSystem
+  private selectIdSystem: IdSystem | null = null;
+  private selectObject: THREE.Object3D | null = null;
   private reticle = new Reticle();
   private helper?: THREE.ArrowHelper;
   private controller?: THREE.Group;
