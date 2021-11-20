@@ -13,6 +13,7 @@ export function useXR(toastMessage: Ref<string>) {
       const xr = (navigator as unknown as Navigator).xr;
       isXrSupported.value = await xr?.isSessionSupported("immersive-ar");
     },
+    // TODO: pass initial scene as startAR param
     async startAR() {
       await idar.init(toastMessage);
       await idar.start();

@@ -2,10 +2,11 @@
   <div class="model-tile" @click="openModelDetails()">
     <el-image fit="contain" :src="imageSrc" />
     <div class="label">
-      <p>{{ model.getModelMetaData().name }}</p>
+      <h2 class="hidden-sm-and-down">{{ model.meta.name }}</h2>
+      <h3 class="hidden-md-and-up">{{ model.meta.name }}</h3>
       <el-button
-        @click.stop="startAR"
-        :class="{ hidden: !isXrSupported }"
+        @click="startAR"
+        :disabled="!isXrSupported"
         type="primary"
         plain
       >
@@ -16,31 +17,38 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, PropType } from "vue";
+import { defineComponent, ref, PropType, computed } from "vue";
 import { useRouter } from "vue-router";
 
-import { useXR } from "@/composables/webxr/composables/useXR";
-import { IdSystem } from "@/composables/idSystem/IdSystem";
+import { IdModel } from "@/composables/idSystem/IdModel";
 
 export default defineComponent({
   props: {
-    model: { type: Object as PropType<IdSystem>, required: true },
+    model: {
+      type: Object as PropType<IdModel>,
+      required: true,
+    },
+    startAR: {
+      type: Function as PropType<() => Promise<void>>,
+      required: true,
+    },
+    isXrSupported: {
+      type: Boolean,
+      default: false,
+    },
   },
   setup(props) {
     const router = useRouter();
     const toastMessage = ref("");
-    const { isXrSupported, startAR } = useXR(toastMessage);
-    const modelMetaData = props.model.getModelMetaData();
-    const imageSrc = modelMetaData.modelImagePath;
 
-    const openModelDetails = () =>
-      router.push({ path: `/browser/${modelMetaData.id}` });
+    const openModelDetails = () => {
+      const modelMeta = props.model.meta;
+      router.push({ path: `/browser/${modelMeta.id}` });
+    };
 
     return {
       openModelDetails,
-      imageSrc,
-      startAR,
-      isXrSupported,
+      imageSrc: computed(() => props.model.meta.thumbnailPath),
       toastMessage,
     };
   },
@@ -51,39 +59,42 @@ export default defineComponent({
 .model-tile {
   cursor: pointer;
   position: relative;
+  overflow: hidden;
+  border-radius: 4px;
+  padding-top: 100%;
+  box-shadow: var(--el-box-shadow-base);
+  transition: background ease-in-out 0.15s;
+
+  &:hover {
+    background: #ecf5ff;
+  }
+
+  .el-image {
+    position: absolute;
+    top: 0;
+    width: 100%;
+  }
 
   .label {
-    width: calc(100% - 20px);
-    background-color: rgba(255, 255, 255, 0.507);
+    width: calc(100% - 16px);
+    background-color: #ffffffdd;
     position: absolute;
     bottom: 0;
-    padding: 10px 10px 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 8px;
 
-    p {
-      margin: auto;
-      flex: 1;
-      font-weight: 700;
+    h2,
+    h3 {
+      margin: 0;
     }
 
     .el-button {
       padding: 6px 10.25px;
-      margin: auto;
+      margin-left: 4px;
       height: 40px;
     }
-  }
-
-  .el-image {
-    width: 100%;
-    box-shadow: var(--el-box-shadow-base);
-    transition: all 200ms ease-out;
-  }
-
-  .el-image:hover {
-    box-shadow: 0 2px 4px 2px rgba(0, 0, 0, 0.12),
-      0 0 6px 8px rgba(0, 0, 0, 0.04);
   }
 
   .hidden {

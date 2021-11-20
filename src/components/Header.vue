@@ -1,25 +1,25 @@
 <template>
   <el-header :style="headerStyle">
-    <el-row :gutter="10">
-      <el-col :xs="4" :span="2" :xl="1">
-        <el-button @click="onBack" type="primary" plain>
-          <font-awesome-icon :icon="['fas', 'arrow-left']" />
-        </el-button>
+    <el-row :gutter="8" justify="space-between" style="flex-wrap: nowrap">
+      <el-col :span="NaN">
+        <el-row :gutter="16">
+          <el-col :span="NaN">
+            <el-button @click="onBack" type="primary" plain>
+              <font-awesome-icon :icon="['fas', 'arrow-left']" />
+            </el-button>
+          </el-col>
+
+          <el-col :span="NaN">
+            <router-link class="hidden-sm-and-down no-link" to="/">
+              <h1 class="logo">
+                <span>ID</span>
+                <span>AR</span>
+              </h1>
+            </router-link>
+          </el-col>
+        </el-row>
       </el-col>
-      <el-col class="hidden-sm-and-down" :span="2">
-        <router-link class="no-link" to="/">
-          <h1 class="logo">
-            <span>ID</span>
-            <span>AR</span>
-          </h1>
-        </router-link>
-      </el-col>
-      <el-col
-        :span="22"
-        :xs="{ span: 19, offset: 1 }"
-        :md="{ span: 12, offset: 8 }"
-        :xl="{ span: 8, offset: 13 }"
-      >
+      <el-col :span="NaN" :md="5" :lg="5" :xl="5">
         <el-autocomplete
           v-if="useAutocomplete"
           style="display: block"
@@ -90,7 +90,7 @@ export default defineComponent({
 
     const onFilterInput = debounce((searchValue) => {
       emit("filterChange", searchValue);
-    }, 1000);
+    }, 300);
 
     return {
       ...props,
@@ -107,9 +107,9 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .el-header {
-  --el-header-padding: 10px 10px;
+  --el-header-padding: 10px 12px;
   @media only screen and (min-width: 1200px) {
-    --el-header-padding: 10px 200px;
+    --el-header-padding: 10px 250px;
   }
   top: 0px;
   left: 0px;
@@ -124,7 +124,7 @@ export default defineComponent({
 
   .logo {
     user-select: none;
-    margin: -5px 0 0;
+    margin: -6px 0 0;
     line-height: 1;
     font-size: 1.1rem;
     span:first-child {

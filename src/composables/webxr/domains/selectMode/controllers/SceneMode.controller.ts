@@ -1,4 +1,4 @@
-import { IdSystem } from "@/composables/idSystem/IdSystem";
+import { IdModel } from "@/composables/idSystem/IdModel";
 import { SessionLifecycle } from "@/composables/webxr/interfaces/SessionLifecycle.interface";
 import { HitTestXRService } from "@/composables/webxr/services/HitTestXR.service";
 import { OverlayXRService } from "@/composables/webxr/services/OverlayXR.service";
@@ -20,7 +20,7 @@ export enum SceneMode {
 @Service()
 export class SceneModeController implements SessionLifecycle {
   private mode: SceneMode = SceneMode.VIEW;
-  private selectIdSystem: IdSystem | null = null;
+  private selectIdSystem: IdModel | null = null;
   private selectObject: THREE.Object3D | null = null;
   private reticle = new Reticle();
   private helper?: THREE.ArrowHelper;
@@ -36,7 +36,7 @@ export class SceneModeController implements SessionLifecycle {
     return this.mode;
   }
 
-  public setSelectMode(idSystem: IdSystem, object: THREE.Object3D) {
+  public setSelectMode(idSystem: IdModel, object: THREE.Object3D) {
     this.mode = SceneMode.SELECT;
     this.selectIdSystem = idSystem;
     this.selectObject = object;

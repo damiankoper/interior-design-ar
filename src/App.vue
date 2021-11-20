@@ -1,25 +1,42 @@
 <template>
-  <router-view />
+  <router-view :isXrSupported="isXrSupported" :startAR="startAR" />
+  <RootOverlay @close="stopAR" :toastMessage="toastMessage" />
 </template>
 
 <script lang="ts">
-import { defineComponent, provide } from "vue";
-import { IdSystemsInjectKey } from "@/symbols";
-import modelsMetaJson from "@/assets/models.json";
+import { defineComponent, onMounted, onUnmounted, provide, ref } from "vue";
+import { IdModelsInjectKey } from "@/symbols";
 
-import { IdSystem } from "@/composables/idSystem/IdSystem";
+import { IdModel } from "@/composables/idSystem/IdModel";
+import RootOverlay from "./components/overlay/RootOverlay.vue";
+import { useXR } from "./composables/webxr/composables/useXR";
 
 export default defineComponent({
+  components: { RootOverlay: RootOverlay },
   setup() {
-    const idSystems: IdSystem[] = modelsMetaJson.map((modelMeta) => {
-      const modelPath = `/models/${modelMeta.id}/${modelMeta.id}`;
-      return new IdSystem({
-        ...modelMeta,
-        modelImagePath: `${modelPath}.png`,
-        webGlModelPath: `${modelPath}.glb`,
-      });
+    const toastMessage = ref("");
+    const { isXrSupported, getXRSupport, startAR, stopAR } =
+      useXR(toastMessage);
+
+    onMounted(async () => {
+      await getXRSupport();
     });
-    provide(IdSystemsInjectKey, idSystems);
+
+    onUnmounted(() => {
+      stopAR();
+    });
+
+    const idModels: IdModel[] = [
+      "SheenChair",
+      "SheenChair",
+      "SheenChair",
+      "SheenChair",
+      "SheenChair",
+      "SheenChair",
+      "SheenChair",
+    ].map((id) => new IdModel(id));
+    provide(IdModelsInjectKey, idModels);
+    return { stopAR, isXrSupported, startAR };
   },
 });
 </script>
@@ -32,7 +49,13 @@ body {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
+
+  .el-main {
+    --el-main-padding: 72px 12px 48px;
+    @media only screen and (min-width: 1200px) {
+      --el-main-padding: 72px 250px 48px;
+    }
+  }
 }
 </style>

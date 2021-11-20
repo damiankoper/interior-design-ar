@@ -2,94 +2,108 @@ import { Service } from "typedi";
 import * as THREE from "three";
 import { ServiceLifecycle } from "../webxr/interfaces/ServiceLifecycle.interface";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { IdSystem } from "../idSystem/IdSystem";
+import { IdModel } from "../idSystem/IdModel";
 
 @Service()
 export class ModelViewer implements ServiceLifecycle {
-  private _renderer!: THREE.WebGLRenderer;
-  private _scene!: THREE.Scene;
-  private _camera!: THREE.PerspectiveCamera;
-  private _controls!: OrbitControls;
+  private container?: HTMLDivElement;
+  private renderer: THREE.WebGLRenderer;
+  private scene: THREE.Scene;
+  private camera: THREE.PerspectiveCamera;
+  private controls: OrbitControls;
+  private model?: THREE.Group;
 
-  public async init(container: HTMLDivElement, model: IdSystem): Promise<void> {
-    this._scene = new THREE.Scene();
-    this._scene.background = new THREE.Color(0xcccccc);
+  private destroyed = false;
 
-    this.setupRenderer();
-
-    container.append(this._renderer.domElement);
-
-    this.setupCamera();
-
-    this.setupControls(container);
-
-    this._scene.add(await model.load());
-
-    this.setupLights();
-
-    window.addEventListener("resize", this.onWindowResize, false);
+  constructor() {
+    this.scene = new THREE.Scene();
+    this.renderer = this.initRenderer();
+    this.camera = this.initCamera();
+    this.controls = this.initControls(this.camera, this.renderer);
+    this.initLights(this.scene);
+    // init fake shadow and add to scene (plane with texture): radial gradient (black to transparent)
   }
 
-  public get renderer() {
-    if (!this._renderer) throw new Error("Renderer not initiated!");
-    return this._renderer;
+  public async init(container: HTMLDivElement, model: IdModel): Promise<void> {
+    this.destroyed = false;
+    this.container = container;
+    this.setSize();
+
+    this.model = await model.getModel();
+    this.adjustScene(this.model);
+    this.scene.add(this.model);
+
+    container.appendChild(this.renderer.domElement);
+    window.addEventListener("resize", this.setSize.bind(this), false);
   }
 
   public async destroy(): Promise<void> {
-    this._scene.clear();
+    this.destroyed = true;
+    if (this.model) this.scene.remove(this.model);
   }
 
-  private onWindowResize() {
-    this._camera.aspect = window.innerWidth / window.innerHeight; //TODO: when resizing the page, camera is undefined :(
-    this._camera.updateProjectionMatrix();
-    this._renderer.setSize(window.innerWidth, window.innerHeight);
+  public adjustScene(model: THREE.Group) {
+    const size = new THREE.Vector3();
+    const box = new THREE.Box3().setFromObject(model);
+    box.getSize(size);
+    model.position.setY(-size.y / 2);
+
+    //TODO: the bigger the bounding box the further camera is
+    this.camera.position.set(1, 0.8, 1).multiplyScalar(0.7);
   }
 
-  private setupControls(container: HTMLDivElement) {
-    this._controls = new OrbitControls(this._camera, this._renderer.domElement);
-    this._controls.listenToKeyEvents(container); //TODO: Check if this is valid
-    this._controls.enableDamping = true;
-    this._controls.dampingFactor = 0.05;
-    this._controls.screenSpacePanning = false;
-    this._controls.minDistance = 100;
-    this._controls.maxDistance = 500;
-    this._controls.maxPolarAngle = Math.PI / 2;
+  private setSize() {
+    const width = this.container?.offsetWidth || 0;
+    const height = this.container?.offsetHeight || 0;
+    this.renderer.setSize(width, height);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
   }
 
-  private setupRenderer() {
-    this._renderer = new THREE.WebGLRenderer({
+  private initControls(camera: THREE.Camera, renderer: THREE.Renderer) {
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.center = new THREE.Vector3(1, 1, 1);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.screenSpacePanning = false;
+    controls.minDistance = 1;
+    controls.maxDistance = 5;
+    controls.autoRotate = true;
+    controls.maxPolarAngle = Math.PI / 2;
+    return controls;
+  }
+
+  private initRenderer() {
+    const renderer = new THREE.WebGLRenderer({
       antialias: true,
+      alpha: true,
     });
-    this._renderer.setPixelRatio(window.devicePixelRatio);
-    this._renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    return renderer;
   }
 
-  private setupCamera() {
-    this._camera = new THREE.PerspectiveCamera(
-      90,
+  private initCamera() {
+    const camera = new THREE.PerspectiveCamera(
+      50,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
     );
-    //this._camera.position.set(10, 10, 0);
+    return camera;
   }
 
-  private setupLights() {
-    const dirLight1 = new THREE.DirectionalLight(0xffffff);
+  private initLights(scene: THREE.Scene) {
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.5);
     dirLight1.position.set(1, 1, 1);
-    this._scene.add(dirLight1);
+    scene.add(dirLight1);
 
-    const dirLight2 = new THREE.DirectionalLight(0x002288);
-    dirLight2.position.set(-1, -1, -1);
-    this._scene.add(dirLight2);
-
-    const ambientLight = new THREE.AmbientLight(0x222222);
-    this._scene.add(ambientLight);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
   }
 
   public animate() {
-    requestAnimationFrame(this.animate.bind(this)); //TODO: We sure about binding this? https://stackoverflow.com/questions/46130737/three-js-uncaught-typeerror-cannot-read-property-render-of-undefined-error
-    this._controls.update();
-    this._renderer.render(this._scene, this._camera);
+    if (!this.destroyed) requestAnimationFrame(this.animate.bind(this));
+    this.controls.update();
+    this.renderer.render(this.scene, this.camera);
   }
 }

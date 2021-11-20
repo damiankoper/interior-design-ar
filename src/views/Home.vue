@@ -14,8 +14,8 @@
         <el-col :span="24">
           <router-link to="/browser">
             <el-button type="primary">
-              <font-awesome-icon size="2x" :icon="['fas', 'cubes']" /> Browse
-              models
+              <font-awesome-icon size="2x" :icon="['fas', 'cubes']" />
+              Browse models
             </el-button>
           </router-link>
         </el-col>
@@ -29,38 +29,27 @@
     </el-main>
     <Footer />
   </el-container>
-
-  <RootOverlay @close="stopAR" :toastMessage="toastMessage" />
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, ref } from "vue";
-import { useXR } from "@/composables/webxr/composables/useXR";
+import { defineComponent, PropType } from "vue";
 import Footer from "@/components/Footer.vue";
-import RootOverlay from "@/components/overlay/RootOverlay.vue";
 
 export default defineComponent({
+  props: {
+    startAR: {
+      type: Function as PropType<() => Promise<void>>,
+      required: true,
+    },
+    isXrSupported: {
+      type: Boolean,
+      default: false,
+    },
+  },
   name: "Home",
-  components: { Footer, RootOverlay },
+  components: { Footer },
   setup() {
-    const toastMessage = ref("");
-    const { isXrSupported, getXRSupport, startAR, stopAR } =
-      useXR(toastMessage);
-
-    onMounted(async () => {
-      await getXRSupport();
-    });
-
-    onUnmounted(() => {
-      stopAR();
-    });
-
-    return {
-      startAR,
-      stopAR,
-      isXrSupported,
-      toastMessage,
-    };
+    return {};
   },
 });
 </script>
@@ -81,6 +70,7 @@ export default defineComponent({
   justify-content: center;
   flex-direction: column;
   height: calc(100vh - 32px);
+  text-align: center;
 
   .logo {
     user-select: none;

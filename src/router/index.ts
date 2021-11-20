@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 import Home from "@/views/Home.vue";
+import ModelBrowser from "@/views/ModelBrowser.vue";
+import ModelDetails from "@/views/ModelDetails.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -10,14 +12,12 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/browser",
     name: "Model browser",
-    component: () =>
-      import(/* webpackChunkName: "browser" */ "@/views/ModelBrowser.vue"),
+    component: ModelBrowser,
   },
   {
     path: "/browser/:modelId",
     name: "Model details",
-    component: () =>
-      import(/* webpackChunkName: "browser" */ "@/views/ModelDetails.vue"),
+    component: ModelDetails,
   },
 ];
 

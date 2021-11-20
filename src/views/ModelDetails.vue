@@ -2,27 +2,29 @@
   <el-container>
     <Header :useAutocomplete="true" />
     <el-main v-if="model">
-      <div ref="viewParentDiv"></div>
-      <el-row align="middle">
-        <el-col :span="20" :xl="24">
-          <h1>{{ model.getModelMetaData().name }}</h1>
-        </el-col>
-        <el-col class="hidden-xl-only" :span="4">
-          <el-button
-            @click="startAR"
-            :class="isXrSupported ? '' : 'hidden'"
-            type="primary"
-            plain
-          >
-            <font-awesome-icon :icon="['fas', 'vr-cardboard']" />
-          </el-button>
-        </el-col>
-        <el-col>
-          <p class="desc">
-            {{ model.getModelMetaData().description }}
-          </p>
-        </el-col>
-      </el-row>
+      <div class="model-details">
+        <div ref="viewerRoot" class="viewer-root">
+          <div class="viewer-root-overlay" />
+        </div>
+        <div class="model-data">
+          <el-row align="middle" class="" justify="space-between">
+            <el-col :span="NaN">
+              <h1>{{ meta.name }}</h1>
+            </el-col>
+            <el-col :span="NaN">
+              <el-button
+                @click="startAR"
+                :disabled="!isXrSupported"
+                type="primary"
+                plain
+              >
+                <font-awesome-icon :icon="['fas', 'vr-cardboard']" />
+              </el-button>
+            </el-col>
+            <el-col :span="24" class="desc" v-html="meta.description" />
+          </el-row>
+        </div>
+      </div>
     </el-main>
     <div class="not-found" v-else>
       <p>Requested model was not found</p>
@@ -35,39 +37,33 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, inject, ref } from "vue";
-import { useRoute } from "vue-router";
-import { IdSystemsInjectKey } from "@/symbols";
+import { defineComponent, PropType, ref } from "vue";
 
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
-import { useXR } from "@/composables/webxr/composables/useXR";
 import { useModelViewer } from "@/composables/modelViewer/composables/useModelViewer";
 
 export default defineComponent({
   name: "Model Details",
   components: { Header, Footer },
+  props: {
+    startAR: {
+      type: Function as PropType<() => Promise<void>>,
+      required: true,
+    },
+    isXrSupported: {
+      type: Boolean,
+      default: false,
+    },
+  },
   setup() {
-    const route = useRoute();
-    const models = inject(IdSystemsInjectKey, []);
-    const model = computed(
-      () =>
-        models.find((m) => m.getModelMetaData().id === route.params.modelId) ??
-        null
-    );
-
-    const toastMessage = ref("");
-    const { isXrSupported, startAR } = useXR(toastMessage);
-
-    const viewParentDiv = ref<HTMLDivElement | null>(null);
-
-    useModelViewer(viewParentDiv, model);
+    const viewerRoot = ref<HTMLDivElement | null>(null);
+    const { model, meta } = useModelViewer(viewerRoot);
 
     return {
-      viewParentDiv,
+      viewerRoot,
       model,
-      startAR,
-      isXrSupported,
+      meta,
     };
   },
 });
@@ -77,14 +73,6 @@ export default defineComponent({
 .el-main {
   background-color: rgb(245, 245, 245);
   min-height: 100vh;
-  --el-main-padding: 60px 0 0;
-  @media only screen and (min-width: 1200px) {
-    --el-main-padding: 70px 200px 32px;
-  }
-
-  .el-row {
-    padding: 0 20px 0;
-  }
 
   .el-button {
     padding: 6px 11px;
@@ -103,6 +91,39 @@ export default defineComponent({
   }
   .hidden {
     display: none;
+  }
+
+  .model-details {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+  }
+
+  .viewer-root {
+    height: 50vh;
+    max-height: 500px;
+    width: 100%;
+    background: #ecf5ff;
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    &-overlay {
+      pointer-events: none;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(#00000000 99%, #00000010 100%);
+    }
+    z-index: 1;
+  }
+
+  .model-data {
+    background: white;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0 0 4px 4px;
+    padding: 16px;
+    width: 100%;
+    box-sizing: border-box;
   }
 }
 

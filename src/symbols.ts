@@ -1,7 +1,7 @@
 // based on https://logaretm.com/blog/type-safe-provide-inject/
 
 import type { InjectionKey } from "vue";
-import type { IdSystem } from "@/composables/idSystem/IdSystem";
+import type { IdModel } from "@/composables/idSystem/IdModel";
 
-export const IdSystemsInjectKey: InjectionKey<IdSystem[]> =
-  Symbol("IdSystemsInjectKey");
+export const IdModelsInjectKey: InjectionKey<IdModel[]> =
+  Symbol("IdModelsInjectKey");

@@ -1,19 +1,14 @@
 import { ref, computed, inject } from "vue";
 import { useRouter } from "vue-router";
-import type { ModelMetaData } from "@/composables/idSystem/interfaces/ModelMetaData.interface";
-import { IdSystemsInjectKey } from "@/symbols";
+import { IdModelsInjectKey } from "@/symbols";
+import { IdModelMeta } from "./idSystem/interfaces/IdModelMeta.interface.";
 
 export function useModelSearch() {
   const searchValue = ref("");
-  const xmodels = inject(IdSystemsInjectKey, []);
-  const metaModels = computed(() =>
-    xmodels.map((model) => model.getModelMetaData())
-  );
+  const xmodels = inject(IdModelsInjectKey, []);
+  const metaModels = computed(() => xmodels.map((model) => model.meta));
 
-  const querySearch = (
-    queryString: string,
-    cb: (a: ModelMetaData[]) => void
-  ) => {
+  const querySearch = (queryString: string, cb: (a: IdModelMeta[]) => void) => {
     const results = queryString
       ? metaModels.value.filter(createFilter(queryString))
       : metaModels.value;
@@ -22,13 +17,15 @@ export function useModelSearch() {
   };
 
   const createFilter = (queryString: string) => {
-    return (model: ModelMetaData) => {
-      return model.name.toLowerCase().indexOf(queryString.toLowerCase()) !== -1;
+    return (model: IdModelMeta) => {
+      return (
+        model.name?.toLowerCase().indexOf(queryString.toLowerCase()) !== -1
+      );
     };
   };
 
   const router = useRouter();
-  const onSelect = (modelMetaData: ModelMetaData) => {
+  const onSelect = (modelMetaData: IdModelMeta) => {
     if (router.currentRoute.value.name === "Model details") {
       router.replace({ path: `/browser/${modelMetaData.id}` });
     } else {
