@@ -4,7 +4,9 @@ import App from "./App.vue";
 import router from "./router";
 import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
+import "element-plus/theme-chalk/display.css";
 import { library } from "@fortawesome/fontawesome-svg-core";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
   faVrCardboard,
   faCubes,
@@ -12,8 +14,9 @@ import {
   faEllipsisH,
   faEllipsisV,
   faCloudDownloadAlt,
+  faSearch,
+  faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 library.add(
   faVrCardboard,
@@ -21,7 +24,9 @@ library.add(
   faTimes,
   faEllipsisH,
   faEllipsisV,
-  faCloudDownloadAlt
+  faCloudDownloadAlt,
+  faSearch,
+  faArrowLeft
 );
 
 createApp(App)

@@ -1,0 +1,148 @@
+<template>
+  <el-header :style="headerStyle">
+    <el-row :gutter="8" justify="space-between" style="flex-wrap: nowrap">
+      <el-col :span="NaN">
+        <el-row :gutter="16">
+          <el-col :span="NaN">
+            <el-button @click="onBack" type="primary" plain>
+              <font-awesome-icon :icon="['fas', 'arrow-left']" />
+            </el-button>
+          </el-col>
+
+          <el-col :span="NaN">
+            <router-link class="hidden-sm-and-down no-link" to="/">
+              <h1 class="logo">
+                <span>ID</span>
+                <span>AR</span>
+              </h1>
+            </router-link>
+          </el-col>
+        </el-row>
+      </el-col>
+      <el-col :span="NaN" :md="5" :lg="5" :xl="5">
+        <el-autocomplete
+          v-if="useAutocomplete"
+          style="display: block"
+          placeholder="Search for model"
+          clearable
+          v-model="searchValue"
+          :fetch-suggestions="querySearch"
+          @select="onSelect"
+        >
+          <template #prefix>
+            <font-awesome-icon
+              style="margin-left: 5px"
+              :icon="['fas', 'search']"
+            />
+          </template>
+          <template #default="{ item }">
+            <div class="value">{{ item.name }}</div>
+          </template>
+        </el-autocomplete>
+        <el-input
+          v-else
+          placeholder="Search for model"
+          clearable
+          v-model="searchValue"
+          @input="onFilterInput"
+        >
+          <template #prefix>
+            <font-awesome-icon
+              style="margin-left: 5px"
+              :icon="['fas', 'search']"
+            />
+          </template>
+        </el-input>
+      </el-col>
+    </el-row>
+  </el-header>
+</template>
+
+<script lang="ts">
+import { defineComponent, computed } from "vue";
+import { useRouter } from "vue-router";
+import { debounce } from "lodash";
+import { useWindowScroll } from "@/composables/useWindowScroll";
+import { useModelSearch } from "@/composables/useModelSearch";
+
+export default defineComponent({
+  props: {
+    useAutocomplete: Boolean,
+  },
+  emits: ["filterChange"],
+  setup(props, { emit }) {
+    const router = useRouter();
+    const onBack = () => {
+      router.back();
+    };
+
+    const { isWindowScrolledToTop } = useWindowScroll();
+    const headerStyle = computed(() => {
+      return {
+        boxShadow: isWindowScrolledToTop.value
+          ? "none"
+          : "0 8px 5px -5px rgb(0 0 0 / 0.4)",
+        transition: "box-shadow 0.4s",
+      };
+    });
+
+    const { searchValue, querySearch, onSelect } = useModelSearch();
+
+    const onFilterInput = debounce((searchValue) => {
+      emit("filterChange", searchValue);
+    }, 300);
+
+    return {
+      ...props,
+      onBack,
+      headerStyle,
+      searchValue,
+      querySearch,
+      onSelect,
+      onFilterInput,
+    };
+  },
+});
+</script>
+
+<style lang="scss" scoped>
+.el-header {
+  --el-header-padding: 10px 12px;
+  @media only screen and (min-width: 1200px) {
+    --el-header-padding: 10px 250px;
+  }
+  top: 0px;
+  left: 0px;
+  position: fixed;
+  width: 100%;
+  background-color: white;
+  z-index: 100;
+
+  .el-button {
+    padding: 12px 13px;
+  }
+
+  .logo {
+    user-select: none;
+    margin: -6px 0 0;
+    line-height: 1;
+    font-size: 1.1rem;
+    span:first-child {
+      font-size: 3em;
+    }
+    span:last-child {
+      font-size: 0.75em;
+      position: relative;
+      left: -0.3rem;
+    }
+  }
+
+  .no-link {
+    border: none;
+    outline: none;
+    text-decoration: none;
+    color: inherit;
+    -webkit-tap-highlight-color: white;
+  }
+}
+</style>

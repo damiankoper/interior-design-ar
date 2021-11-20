@@ -12,10 +12,10 @@
       </el-row>
       <el-row>
         <el-col :span="24">
-          <router-link to="/about">
+          <router-link to="/browser">
             <el-button type="primary">
-              <font-awesome-icon size="2x" :icon="['fas', 'cubes']" /> Browse
-              models
+              <font-awesome-icon size="2x" :icon="['fas', 'cubes']" />
+              Browse models
             </el-button>
           </router-link>
         </el-col>
@@ -27,47 +27,29 @@
         </el-col>
       </el-row>
     </el-main>
-
-    <!-- TODO: extract footer to component -->
-    <el-footer
-      height="32px"
-      style="background-color: white; display: flex; align-items: center"
-    >
-      Stopa
-    </el-footer>
-    <!-- TODO: extract footer to component -->
+    <Footer />
   </el-container>
-
-  <RootOverlay @close="stopAR" :toastMessage="toastMessage" />
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, ref } from "vue";
-import { useXR } from "@/composables/webxr/composables/useXR";
-import RootOverlay from "@/components/overlay/RootOverlay.vue";
+import { defineComponent, PropType } from "vue";
+import Footer from "@/components/Footer.vue";
 
 export default defineComponent({
+  props: {
+    startAR: {
+      type: Function as PropType<() => Promise<void>>,
+      required: true,
+    },
+    isXrSupported: {
+      type: Boolean,
+      default: false,
+    },
+  },
   name: "Home",
-  components: { RootOverlay },
+  components: { Footer },
   setup() {
-    const toastMessage = ref("");
-    const { isXrSupported, getXRSupport, startAR, stopAR } =
-      useXR(toastMessage);
-
-    onMounted(async () => {
-      await getXRSupport();
-    });
-
-    onUnmounted(() => {
-      stopAR();
-    });
-
-    return {
-      startAR,
-      stopAR,
-      isXrSupported,
-      toastMessage,
-    };
+    return {};
   },
 });
 </script>
@@ -78,7 +60,7 @@ export default defineComponent({
   background: linear-gradient(
     147deg,
     rgb(255, 255, 255) 0%,
-    rgb(160, 204, 255) 100%
+    rgb(174, 212, 255) 100%
   );
 }
 
@@ -88,8 +70,10 @@ export default defineComponent({
   justify-content: center;
   flex-direction: column;
   height: calc(100vh - 32px);
+  text-align: center;
 
   .logo {
+    user-select: none;
     margin: 0;
     line-height: 1;
     font-size: 5rem;
@@ -103,6 +87,7 @@ export default defineComponent({
     }
   }
   .sublogo {
+    user-select: none;
     font-size: 1.08rem;
     position: relative;
     top: -2rem;

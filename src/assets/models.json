@@ -1,0 +1,17 @@
+[
+  {
+    "id": "SheenChair",
+    "name": "Sheen Chair",
+    "description": "A realy comfy and cozy chair."
+  },
+  {
+    "id": "SheenChair",
+    "name": "Sheen Chair 1",
+    "description": "Not so cozy anymore."
+  },
+  {
+    "id": "SheenChair",
+    "name": "Sheen Chair 2",
+    "description": "Won't sit on this!"
+  }
+]
