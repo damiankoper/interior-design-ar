@@ -27,7 +27,7 @@ export interface SessionPersistance {
   /**
    * Loads saved session from localStorage and fetches valid models.
    * Then it creates THREE.Group witch fetched models as its children.
-   * The children have its matrix set from localStorage
+   * The children have its matrices set from localStorage
    */
   getGroup(): Promise<THREE.Group>;
 }
