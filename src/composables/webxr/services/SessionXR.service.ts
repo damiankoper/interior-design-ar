@@ -1,3 +1,4 @@
+import { SignalDispatcher } from "ste-signals";
 import { WebGLRenderer, XRFrame, XRSession } from "three";
 import { Service } from "typedi";
 import { Navigator, XRSystem } from "webxr";
@@ -23,6 +24,16 @@ export class SessionXRService implements ServiceLifecycle {
     return this._session;
   }
 
+  private _onSessionEnd = new SignalDispatcher();
+  public get onSessionEnd() {
+    return this._onSessionEnd.asEvent();
+  }
+
+  private _onSessionStart = new SignalDispatcher();
+  public get onSessionStart() {
+    return this._onSessionStart.asEvent();
+  }
+
   constructor(
     public overlayService: OverlayXRService,
     public hitTestService: HitTestXRService,
@@ -41,8 +52,8 @@ export class SessionXRService implements ServiceLifecycle {
       domOverlay: { root: this.overlayService.root },
     })) as unknown as THREE.XRSession;
     await renderer.xr.setSession(this._session);
-
-    renderer.setAnimationLoop((time, frame) =>
+    this._onSessionStart.dispatch();
+    renderer.xr.setAnimationLoop((time, frame) =>
       this.renderLoop(time, frame, renderer, scene, camera)
     );
 
@@ -51,6 +62,7 @@ export class SessionXRService implements ServiceLifecycle {
       this.hitTestService.destroy();
       this.sceneService.destroy();
       renderer.setAnimationLoop(null);
+      this._onSessionEnd.dispatch();
     });
   }
 
@@ -68,7 +80,6 @@ export class SessionXRService implements ServiceLifecycle {
         this.sceneService.update(frame, referenceSpace);
       }
     }
-
     renderer.render(scene, camera);
   }
 

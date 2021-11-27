@@ -5,13 +5,15 @@ import { SessionXRService } from "./services/SessionXR.service";
 import { Ref } from "vue";
 import { SceneModeController } from "./domains/selectMode/controllers/SceneMode.controller";
 import { ServiceLifecycle } from "./interfaces/ServiceLifecycle.interface";
+import * as THREE from "three";
+
 @Service()
 export class IdarXR implements ServiceLifecycle {
   constructor(
     public overlayService: OverlayXRService,
     public sceneService: SceneXRService,
-    public sesionService: SessionXRService,
-    private sceneModeController: SceneModeController
+    public sessionService: SessionXRService,
+    public sceneModeController: SceneModeController
   ) {}
 
   public async init(toastMessage: Ref<string>): Promise<void> {
@@ -21,15 +23,28 @@ export class IdarXR implements ServiceLifecycle {
     this.sceneService.init();
   }
 
-  public async start(): Promise<void> {
-    await this.sesionService.init(
+  public async start(initialSelectGroup?: THREE.Group): Promise<void> {
+    await this.sessionService.init(
       this.sceneService.renderer,
       this.sceneService.scene,
       this.sceneService.camera
     );
+
+    if (initialSelectGroup) {
+      this.sceneModeController.setSelectMode(initialSelectGroup);
+      this.overlayService.showToast(
+        // TODO: swipe
+        "Tap screen to place model. Swipe right/left to rotate it"
+      );
+    } else {
+      this.sceneModeController.setViewMode();
+      this.overlayService.showToast(
+        "Open menu and select desired furniture to set it in the real world"
+      );
+    }
   }
 
   public async destroy() {
-    await this.sesionService.destroy();
+    await this.sessionService.destroy();
   }
 }

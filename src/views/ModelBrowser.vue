@@ -30,12 +30,13 @@ import { IdModelsInjectKey } from "@/symbols";
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
 import ModelTile from "@/components/ModelTile.vue";
+import * as THREE from "three";
 
 export default defineComponent({
   components: { Header, Footer, ModelTile },
   props: {
     startAR: {
-      type: Function as PropType<() => Promise<void>>,
+      type: Function as PropType<(object: THREE.Group | null) => Promise<void>>,
       required: true,
     },
     isXrSupported: {

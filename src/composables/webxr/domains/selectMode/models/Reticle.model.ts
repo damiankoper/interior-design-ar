@@ -18,6 +18,13 @@ export class Reticle implements SessionLifecycle {
     scene.add(this.model);
   }
 
+  public show() {
+    if (this.model) this.model.visible = true;
+  }
+  public hide() {
+    if (this.model) this.model.visible = false;
+  }
+
   public update(
     frame: XRFrame,
     referenceSpace: XRReferenceSpace,

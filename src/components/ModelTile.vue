@@ -4,8 +4,9 @@
     <div class="label">
       <h2 class="hidden-sm-and-down">{{ model.meta.name }}</h2>
       <h3 class="hidden-md-and-up">{{ model.meta.name }}</h3>
+      <!-- TODO: "AR not supported" el-tooltip to the left-->
       <el-button
-        @click="startAR"
+        @click.prevent.stop="onARClick"
         :disabled="!isXrSupported"
         type="primary"
         plain
@@ -17,10 +18,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, PropType, computed } from "vue";
+import { defineComponent, PropType, computed } from "vue";
 import { useRouter } from "vue-router";
 
 import { IdModel } from "@/composables/idSystem/IdModel";
+import * as THREE from "three";
 
 export default defineComponent({
   props: {
@@ -29,7 +31,7 @@ export default defineComponent({
       required: true,
     },
     startAR: {
-      type: Function as PropType<() => Promise<void>>,
+      type: Function as PropType<(object: THREE.Group | null) => Promise<void>>,
       required: true,
     },
     isXrSupported: {
@@ -39,7 +41,6 @@ export default defineComponent({
   },
   setup(props) {
     const router = useRouter();
-    const toastMessage = ref("");
 
     const openModelDetails = () => {
       const modelMeta = props.model.meta;
@@ -49,7 +50,9 @@ export default defineComponent({
     return {
       openModelDetails,
       imageSrc: computed(() => props.model.meta.thumbnailPath),
-      toastMessage,
+      async onARClick() {
+        if (props.model) props.startAR(await props.model.getModel());
+      },
     };
   },
 });

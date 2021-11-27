@@ -19,6 +19,11 @@
           </el-col>
         </el-row>
       </el-col>
+      <!-- 
+          TODO Karol: Search field is visible in modelViewer route
+          Replace it with model name e.g. "Sheen Chair"
+          See: miro. Note difference between Mobile and desktop view (alignment).
+         -->
       <el-col :span="NaN" :md="5" :lg="5" :xl="5">
         <el-autocomplete
           v-if="useAutocomplete"

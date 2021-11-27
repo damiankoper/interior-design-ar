@@ -40,8 +40,10 @@ export class IdModel {
         (progressEvent) => this._modelLoadProgress.dispatch(progressEvent)
       );
       this.model = modelGltf.scene;
+      this.model.matrixAutoUpdate = false;
+      this.model.userData.meta = this.meta;
     }
-    return this.model;
+    return this.model.clone();
   }
 
   public destroy(): void {

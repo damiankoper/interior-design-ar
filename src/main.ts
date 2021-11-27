@@ -16,6 +16,7 @@ import {
   faCloudDownloadAlt,
   faSearch,
   faArrowLeft,
+  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 
 library.add(
@@ -26,7 +27,8 @@ library.add(
   faEllipsisV,
   faCloudDownloadAlt,
   faSearch,
-  faArrowLeft
+  faArrowLeft,
+  faTrash
 );
 
 createApp(App)

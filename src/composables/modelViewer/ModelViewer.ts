@@ -12,6 +12,7 @@ export class ModelViewer implements ServiceLifecycle {
   private camera: THREE.PerspectiveCamera;
   private controls: OrbitControls;
   private model?: THREE.Group;
+  private requestId = 0;
 
   private destroyed = false;
 
@@ -21,7 +22,9 @@ export class ModelViewer implements ServiceLifecycle {
     this.camera = this.initCamera();
     this.controls = this.initControls(this.camera, this.renderer);
     this.initLights(this.scene);
-    // init fake shadow and add to scene (plane with texture): radial gradient (black to transparent)
+    // TODO init fake shadow (plane with texture): radial gradient(black to transparent) and (choose):
+    // * add to scene here and manage it here
+    // * add to the model group and unify behaviour of shadow for viewer and AR
   }
 
   public async init(container: HTMLDivElement, model: IdModel): Promise<void> {
@@ -30,6 +33,7 @@ export class ModelViewer implements ServiceLifecycle {
     this.setSize();
 
     this.model = await model.getModel();
+
     this.adjustScene(this.model);
     this.scene.add(this.model);
 
@@ -39,6 +43,7 @@ export class ModelViewer implements ServiceLifecycle {
 
   public async destroy(): Promise<void> {
     this.destroyed = true;
+    cancelAnimationFrame(this.requestId);
     if (this.model) this.scene.remove(this.model);
   }
 
@@ -47,6 +52,7 @@ export class ModelViewer implements ServiceLifecycle {
     const box = new THREE.Box3().setFromObject(model);
     box.getSize(size);
     model.position.setY(-size.y / 2);
+    model.updateMatrix();
 
     //TODO: the bigger the bounding box the further camera is
     this.camera.position.set(1, 0.8, 1).multiplyScalar(0.7);
@@ -94,7 +100,7 @@ export class ModelViewer implements ServiceLifecycle {
 
   private initLights(scene: THREE.Scene) {
     const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.5);
-    dirLight1.position.set(1, 1, 1);
+    dirLight1.position.set(10, 10, 10);
     scene.add(dirLight1);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -102,7 +108,9 @@ export class ModelViewer implements ServiceLifecycle {
   }
 
   public animate() {
-    if (!this.destroyed) requestAnimationFrame(this.animate.bind(this));
+    console.log("[ModelViewer] Loop");
+    if (!this.destroyed)
+      this.requestId = requestAnimationFrame(this.animate.bind(this));
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
   }

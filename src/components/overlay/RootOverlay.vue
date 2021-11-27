@@ -10,7 +10,11 @@
       "
     >
       <el-row justify="space-between" style="padding: 24px">
-        <el-button type="primary" @click="$emit('close')">
+        <el-button
+          type="primary"
+          @click="$emit('close')"
+          @beforexrselect.prevent
+        >
           <font-awesome-icon size="lg" :icon="['fas', 'times']" />
         </el-button>
         <div>
@@ -18,16 +22,30 @@
             type="primary"
             v-if="sceneAvailable"
             @click="$emit('loadScene')"
+            @beforexrselect.prevent
           >
             <font-awesome-icon
               size="lg"
               :icon="['fas', 'cloud-download-alt']"
             />
           </el-button>
-          <el-button type="primary" @click="objectMenu = !objectMenu">
+          <el-button
+            type="primary"
+            @click="
+              objectMenuDelete ? $emit('delete') : (objectMenu = !objectMenu)
+            "
+            @beforexrselect.prevent
+          >
             <font-awesome-icon
               size="lg"
-              :icon="['fas', objectMenu ? 'ellipsis-h' : 'ellipsis-v']"
+              :icon="[
+                'fas',
+                objectMenu
+                  ? 'ellipsis-h'
+                  : objectMenuDelete
+                  ? 'trash'
+                  : 'ellipsis-v',
+              ]"
             />
           </el-button>
         </div>
@@ -44,8 +62,10 @@
               v-for="i in 10"
               :key="i"
               class="object-container"
-              @click="$emit('select:model', i)"
+              @click="$emit('select:model', models[0])"
+              @beforexrselect.prevent
             >
+              <!-- TODO: models[0] for test purposes -->
               <!-- TODO: iterate over props.objects when available -->
               <!-- TODO: later model object instead of 'i' in $emit -->
               <img src="/models/SheenChair/SheenChair.png" />
@@ -58,7 +78,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref, watch } from "vue";
+import { SceneMode } from "@/composables/webxr/domains/selectMode/controllers/SceneMode.controller";
+import { IdModelsInjectKey } from "@/symbols";
+import { SimpleEventDispatcher } from "ste-simple-events";
+import {
+  defineComponent,
+  inject,
+  onMounted,
+  onUnmounted,
+  PropType,
+  ref,
+  watch,
+} from "vue";
 
 export default defineComponent({
   props: {
@@ -66,13 +97,39 @@ export default defineComponent({
     toastMessage: { type: String, default: "" },
     loading: { type: Boolean, default: false },
     objects: { type: Array as PropType<unknown>, default: () => [] },
+    onSceneModeChange: {
+      type: Object as PropType<SimpleEventDispatcher<SceneMode>>,
+      required: true,
+    },
   },
-  emits: ["close", "select:model"],
+  emits: ["close", "delete", "select:model"],
   setup(props) {
     const objectMenu = ref(false);
+    const objectMenuDelete = ref(false);
     const toastVisible = ref(false);
     const toastTimeout = 5000;
     let toastTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const models = inject(IdModelsInjectKey, []);
+
+    const events: (() => void)[] = [];
+    onMounted(() => {
+      events.push(
+        props.onSceneModeChange.sub((mode: SceneMode) => {
+          if (mode === SceneMode.SELECT) {
+            objectMenu.value = false;
+            objectMenuDelete.value = true;
+          } else {
+            objectMenuDelete.value = false;
+          }
+        })
+      );
+    });
+
+    onUnmounted(() => {
+      events.forEach((e) => e());
+    });
+
     watch(
       () => props.toastMessage,
       () => {
@@ -84,7 +141,7 @@ export default defineComponent({
         );
       }
     );
-    return { objectMenu, toastVisible };
+    return { objectMenu, objectMenuDelete, toastVisible, models };
   },
 });
 </script>

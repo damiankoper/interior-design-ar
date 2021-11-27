@@ -12,8 +12,9 @@
               <h1>{{ meta.name }}</h1>
             </el-col>
             <el-col :span="NaN">
+              <!-- TODO: "AR not supported" el-tooltip to the left-->
               <el-button
-                @click="startAR"
+                @click="onARClick"
                 :disabled="!isXrSupported"
                 type="primary"
                 plain
@@ -37,18 +38,28 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, ref } from "vue";
+import { defineComponent, onMounted, PropType, ref } from "vue";
 
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
 import { useModelViewer } from "@/composables/modelViewer/composables/useModelViewer";
-
+import * as THREE from "three";
+import { SignalDispatcher } from "ste-signals";
+import { onBeforeRouteLeave } from "vue-router";
 export default defineComponent({
   name: "Model Details",
   components: { Header, Footer },
   props: {
     startAR: {
-      type: Function as PropType<() => Promise<void>>,
+      type: Function as PropType<(object: THREE.Group | null) => Promise<void>>,
+      required: true,
+    },
+    onSessionStart: {
+      type: Object as PropType<SignalDispatcher>,
+      required: true,
+    },
+    onSessionEnd: {
+      type: Object as PropType<SignalDispatcher>,
       required: true,
     },
     isXrSupported: {
@@ -56,14 +67,27 @@ export default defineComponent({
       default: false,
     },
   },
-  setup() {
+  setup(props) {
     const viewerRoot = ref<HTMLDivElement | null>(null);
-    const { model, meta } = useModelViewer(viewerRoot);
+    const { model, meta, init, destroy } = useModelViewer(viewerRoot);
+
+    const events: (() => void)[] = [];
+    onMounted(() => {
+      events.push(props.onSessionStart.sub(destroy));
+      events.push(props.onSessionEnd.sub(init));
+    });
+    onBeforeRouteLeave(() => {
+      events.forEach((e) => e());
+      events.splice(0, events.length);
+    });
 
     return {
       viewerRoot,
       model,
       meta,
+      async onARClick() {
+        if (model.value) props.startAR(await model.value.getModel());
+      },
     };
   },
 });
@@ -94,7 +118,9 @@ export default defineComponent({
   }
 
   .model-details {
+    overflow: hidden;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+    border-radius: 4px;
   }
 
   .viewer-root {
@@ -102,7 +128,6 @@ export default defineComponent({
     max-height: 500px;
     width: 100%;
     background: #ecf5ff;
-    border-radius: 4px 4px 0 0;
     position: relative;
     &-overlay {
       pointer-events: none;
@@ -120,7 +145,6 @@ export default defineComponent({
     background: white;
     position: relative;
     overflow: hidden;
-    border-radius: 0 0 4px 4px;
     padding: 16px;
     width: 100%;
     box-sizing: border-box;

@@ -25,7 +25,7 @@ export interface SessionPersistance {
   saveGroup(group: THREE.Group & THREE.Object3D): Promise<void>;
 
   /**
-   * Loads saved session from localStorage and fetches valid models.
+   * Loads saved session from localStorage and fetches valid models using IdModel class.
    * Then it creates THREE.Group witch fetched models as its children.
    * The children have its matrices set from localStorage
    */

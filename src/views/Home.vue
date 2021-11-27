@@ -20,7 +20,11 @@
           </router-link>
         </el-col>
         <el-col :span="24">
-          <el-button type="primary" @click="startAR" :disabled="!isXrSupported">
+          <el-button
+            type="primary"
+            @click="startAR()"
+            :disabled="!isXrSupported"
+          >
             <font-awesome-icon size="2x" :icon="['fas', 'vr-cardboard']" />
             {{ isXrSupported ? "Design in AR" : "AR not supported" }}
           </el-button>
@@ -34,11 +38,11 @@
 <script lang="ts">
 import { defineComponent, PropType } from "vue";
 import Footer from "@/components/Footer.vue";
-
+import * as THREE from "three";
 export default defineComponent({
   props: {
     startAR: {
-      type: Function as PropType<() => Promise<void>>,
+      type: Function as PropType<(object: THREE.Group | null) => Promise<void>>,
       required: true,
     },
     isXrSupported: {

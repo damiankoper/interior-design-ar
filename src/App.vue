@@ -1,6 +1,16 @@
 <template>
-  <router-view :isXrSupported="isXrSupported" :startAR="startAR" />
-  <RootOverlay @close="stopAR" :toastMessage="toastMessage" />
+  <router-view
+    :isXrSupported="isXrSupported"
+    :startAR="startAR"
+    :onSessionEnd="onSessionEnd"
+    :onSessionStart="onSessionStart"
+  />
+  <RootOverlay
+    @close="stopAR"
+    @select:model="selectModel"
+    :toastMessage="toastMessage"
+    :onSceneModeChange="onSceneModeChange"
+  />
 </template>
 
 <script lang="ts">
@@ -15,8 +25,16 @@ export default defineComponent({
   components: { RootOverlay: RootOverlay },
   setup() {
     const toastMessage = ref("");
-    const { isXrSupported, getXRSupport, startAR, stopAR } =
-      useXR(toastMessage);
+    const {
+      isXrSupported,
+      getXRSupport,
+      startAR,
+      stopAR,
+      selectModel,
+      onSessionEnd,
+      onSessionStart,
+      onSceneModeChange,
+    } = useXR(toastMessage);
 
     onMounted(async () => {
       await getXRSupport();
@@ -25,18 +43,20 @@ export default defineComponent({
     onUnmounted(() => {
       stopAR();
     });
-
-    const idModels: IdModel[] = [
-      "SheenChair",
-      "SheenChair",
-      "SheenChair",
-      "SheenChair",
-      "SheenChair",
-      "SheenChair",
-      "SheenChair",
-    ].map((id) => new IdModel(id));
+    /** TODO: delete */
+    const idModels: IdModel[] = ["SheenChair"].map((id) => new IdModel(id));
     provide(IdModelsInjectKey, idModels);
-    return { stopAR, isXrSupported, startAR };
+
+    return {
+      stopAR,
+      isXrSupported,
+      startAR,
+      toastMessage,
+      selectModel,
+      onSessionEnd,
+      onSessionStart,
+      onSceneModeChange,
+    };
   },
 });
 </script>
