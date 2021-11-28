@@ -8,26 +8,32 @@ import * as THREE from "three";
 import { Service } from "typedi";
 import { Reticle } from "../models/Reticle.model";
 import { IdModelMeta } from "@/composables/idSystem/interfaces/IdModelMeta.interface.";
-import { SimpleEventDispatcher } from "ste-simple-events";
+import { EventDispatcher } from "ste-events";
 
 export enum SceneMode {
   SELECT,
   VIEW,
 }
 
+const invalidHittest = () => "Move around to detect your surroundings";
+//const loadingModel = (percent:number) => `Loading furniture (${percent}%)`;
+
 @Service()
 export class SceneModeController implements SessionLifecycle {
   private readonly raycaster = new THREE.Raycaster();
-  private _mode: SceneMode = SceneMode.VIEW;
   private reticle = new Reticle();
+  private _mode: SceneMode = SceneMode.VIEW;
 
   private panRotateY = 0;
   private objectSelected: THREE.Object3D | null = null;
-  private get selectedIdModelMeta(): IdModelMeta | null {
+  public get selectedIdModelMeta(): IdModelMeta | null {
     return this.objectSelected?.userData?.meta || null;
   }
 
-  private _onSceneModeChange = new SimpleEventDispatcher<SceneMode>();
+  private _onSceneModeChange = new EventDispatcher<
+    SceneMode,
+    SceneModeController
+  >();
   public get onSceneModeChange() {
     return this._onSceneModeChange.asEvent();
   }
@@ -36,7 +42,7 @@ export class SceneModeController implements SessionLifecycle {
   private isInitialized = false;
   private gestureLastEuler = new THREE.Euler();
   private gestureStartTime = 0;
-  readonly tapMaxTime = 100;
+  readonly tapMaxTime = 300;
 
   constructor(
     public overlayService: OverlayXRService,
@@ -53,7 +59,7 @@ export class SceneModeController implements SessionLifecycle {
     this.objectSelected = object;
     if (addToScene) this.sceneService.scene.add(object);
 
-    this._onSceneModeChange.dispatch(this._mode);
+    this._onSceneModeChange.dispatch(this._mode, this);
   }
 
   public setViewMode(removeFromScene = true) {
@@ -62,7 +68,7 @@ export class SceneModeController implements SessionLifecycle {
       this.sceneService.scene.remove(this.objectSelected);
     this.objectSelected = null;
 
-    this._onSceneModeChange.dispatch(this._mode);
+    this._onSceneModeChange.dispatch(this._mode, this);
   }
 
   public init(scene: THREE.Scene): void {
@@ -158,10 +164,7 @@ export class SceneModeController implements SessionLifecycle {
             );
           } else {
             this.objectSelected.visible = false;
-            // TODO: better toasts
-            this.overlayService.showToast(
-              "Move around to let us detect your surroundings"
-            );
+            this.overlayService.showToast(invalidHittest(), 1000);
           }
         }
         break;

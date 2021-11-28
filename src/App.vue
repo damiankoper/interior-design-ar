@@ -7,34 +7,47 @@
   />
   <RootOverlay
     @close="stopAR"
+    @delete="deleteModel"
     @select:model="selectModel"
-    :toastMessage="toastMessage"
+    :toast="toast"
     :onSceneModeChange="onSceneModeChange"
   />
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, provide, ref } from "vue";
+import {
+  defineComponent,
+  onMounted,
+  onUnmounted,
+  provide,
+  reactive,
+} from "vue";
 import { IdModelsInjectKey } from "@/symbols";
 
 import { IdModel } from "@/composables/idSystem/IdModel";
 import RootOverlay from "./components/overlay/RootOverlay.vue";
 import { useXR } from "./composables/webxr/composables/useXR";
+import { Toast } from "./composables/webxr/interfaces/Toast.interface";
 
 export default defineComponent({
   components: { RootOverlay: RootOverlay },
   setup() {
-    const toastMessage = ref("");
+    const toast = reactive<Toast>({
+      visible: false,
+      message: "",
+    });
+
     const {
       isXrSupported,
       getXRSupport,
       startAR,
       stopAR,
       selectModel,
+      deleteModel,
       onSessionEnd,
       onSessionStart,
       onSceneModeChange,
-    } = useXR(toastMessage);
+    } = useXR(toast);
 
     onMounted(async () => {
       await getXRSupport();
@@ -43,7 +56,7 @@ export default defineComponent({
     onUnmounted(() => {
       stopAR();
     });
-    /** TODO: delete */
+
     const idModels: IdModel[] = ["SheenChair"].map((id) => new IdModel(id));
     provide(IdModelsInjectKey, idModels);
 
@@ -51,8 +64,9 @@ export default defineComponent({
       stopAR,
       isXrSupported,
       startAR,
-      toastMessage,
+      toast,
       selectModel,
+      deleteModel,
       onSessionEnd,
       onSessionStart,
       onSceneModeChange,

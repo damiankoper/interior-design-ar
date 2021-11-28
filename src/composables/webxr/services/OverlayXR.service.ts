@@ -1,20 +1,22 @@
 import { Service } from "typedi";
-import { Ref } from "vue";
 import { ServiceLifecycle } from "../interfaces/ServiceLifecycle.interface";
+import { Toast } from "../interfaces/Toast.interface";
 
 @Service()
 export class OverlayXRService implements ServiceLifecycle {
   private overlay: HTMLDivElement | null = null;
-  private toastMessage?: Ref<string>;
   private readonly err = new Error("Overlay not initiated!");
+
+  private toast?: Toast;
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
   get root(): HTMLDivElement {
     if (!this.overlay) throw this.err;
     return this.overlay;
   }
 
-  public async init(toastMessage: Ref<string>): Promise<void> {
-    this.toastMessage = toastMessage;
+  public async init(toast: Toast): Promise<void> {
+    this.toast = toast;
     const overlay = document.querySelector("#overlay") as HTMLDivElement;
     if (!overlay) {
       this.overlay = document.createElement("div");
@@ -35,9 +37,14 @@ export class OverlayXRService implements ServiceLifecycle {
     this.showToast("");
   }
 
-  public showToast(message: string) {
-    if (!this.toastMessage) throw new Error("Toast ref not initiated!");
-    this.toastMessage.value = message;
+  public showToast(message: string, timeout = 5000) {
+    if (!this.toast) throw new Error("Toast ref not initiated!");
+    this.toast.message = message;
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toast.visible = true;
+    this.toastTimer = setTimeout(() => {
+      if (this.toast) this.toast.visible = false;
+    }, timeout);
   }
 
   public async destroy(): Promise<void> {

@@ -2,10 +2,10 @@ import { Service } from "typedi";
 import { OverlayXRService } from "./services/OverlayXR.service";
 import { SceneXRService } from "./services/SceneXR.service";
 import { SessionXRService } from "./services/SessionXR.service";
-import { Ref } from "vue";
 import { SceneModeController } from "./domains/selectMode/controllers/SceneMode.controller";
 import { ServiceLifecycle } from "./interfaces/ServiceLifecycle.interface";
 import * as THREE from "three";
+import { Toast } from "./interfaces/Toast.interface";
 
 @Service()
 export class IdarXR implements ServiceLifecycle {
@@ -16,8 +16,8 @@ export class IdarXR implements ServiceLifecycle {
     public sceneModeController: SceneModeController
   ) {}
 
-  public async init(toastMessage: Ref<string>): Promise<void> {
-    this.overlayService.init(toastMessage);
+  public async init(toast: Toast): Promise<void> {
+    this.overlayService.init(toast);
 
     this.sceneService.addLifecycleObject(this.sceneModeController);
     this.sceneService.init();

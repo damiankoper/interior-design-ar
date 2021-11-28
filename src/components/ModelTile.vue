@@ -76,6 +76,7 @@ export default defineComponent({
     position: absolute;
     top: 0;
     width: 100%;
+    background-color: #ffffffdd;
   }
 
   .label {

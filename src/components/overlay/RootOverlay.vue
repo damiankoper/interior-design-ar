@@ -17,6 +17,11 @@
         >
           <font-awesome-icon size="lg" :icon="['fas', 'times']" />
         </el-button>
+        <transition name="el-fade-in">
+          <div class="model-info" v-if="selectedModelMeta">
+            {{ selectedModelMeta.name }}
+          </div>
+        </transition>
         <div>
           <el-button
             type="primary"
@@ -53,7 +58,9 @@
       <div>
         <el-row justify="center">
           <transition name="el-fade-in">
-            <div class="toast" v-if="toastVisible">{{ toastMessage }}</div>
+            <div class="toast" v-if="toast.visible">
+              {{ toast.message }}
+            </div>
           </transition>
         </el-row>
         <transition name="select">
@@ -78,9 +85,14 @@
 </template>
 
 <script lang="ts">
-import { SceneMode } from "@/composables/webxr/domains/selectMode/controllers/SceneMode.controller";
+import { IdModelMeta } from "@/composables/idSystem/interfaces/IdModelMeta.interface.";
+import {
+  SceneMode,
+  SceneModeController,
+} from "@/composables/webxr/domains/selectMode/controllers/SceneMode.controller";
+import { Toast } from "@/composables/webxr/interfaces/Toast.interface";
 import { IdModelsInjectKey } from "@/symbols";
-import { SimpleEventDispatcher } from "ste-simple-events";
+import { EventDispatcher } from "ste-events";
 import {
   defineComponent,
   inject,
@@ -88,17 +100,16 @@ import {
   onUnmounted,
   PropType,
   ref,
-  watch,
 } from "vue";
 
 export default defineComponent({
   props: {
     sceneAvailable: { type: Boolean, default: false },
-    toastMessage: { type: String, default: "" },
+    toast: { type: Object as PropType<Toast>, required: true },
     loading: { type: Boolean, default: false },
     objects: { type: Array as PropType<unknown>, default: () => [] },
     onSceneModeChange: {
-      type: Object as PropType<SimpleEventDispatcher<SceneMode>>,
+      type: Object as PropType<EventDispatcher<SceneMode, SceneModeController>>,
       required: true,
     },
   },
@@ -106,23 +117,25 @@ export default defineComponent({
   setup(props) {
     const objectMenu = ref(false);
     const objectMenuDelete = ref(false);
-    const toastVisible = ref(false);
-    const toastTimeout = 5000;
-    let toastTimer: ReturnType<typeof setTimeout> | null = null;
+    const selectedModelMeta = ref<IdModelMeta | null>(null);
 
     const models = inject(IdModelsInjectKey, []);
 
     const events: (() => void)[] = [];
     onMounted(() => {
       events.push(
-        props.onSceneModeChange.sub((mode: SceneMode) => {
-          if (mode === SceneMode.SELECT) {
-            objectMenu.value = false;
-            objectMenuDelete.value = true;
-          } else {
-            objectMenuDelete.value = false;
+        props.onSceneModeChange.sub(
+          (mode: SceneMode, controller: SceneModeController) => {
+            if (mode === SceneMode.SELECT) {
+              objectMenu.value = false;
+              objectMenuDelete.value = true;
+              selectedModelMeta.value = controller.selectedIdModelMeta;
+            } else {
+              objectMenuDelete.value = false;
+              selectedModelMeta.value = null;
+            }
           }
-        })
+        )
       );
     });
 
@@ -130,18 +143,12 @@ export default defineComponent({
       events.forEach((e) => e());
     });
 
-    watch(
-      () => props.toastMessage,
-      () => {
-        if (toastTimer) clearTimeout(toastTimer);
-        toastVisible.value = true;
-        toastTimer = setTimeout(
-          () => (toastVisible.value = false),
-          toastTimeout
-        );
-      }
-    );
-    return { objectMenu, objectMenuDelete, toastVisible, models };
+    return {
+      objectMenu,
+      objectMenuDelete,
+      models,
+      selectedModelMeta,
+    };
   },
 });
 </script>
@@ -212,12 +219,21 @@ export default defineComponent({
   }
   .toast {
     background-color: #ffffffc0;
-    border-radius: 999px;
+    border-radius: 4px;
     padding: 8px 12px;
-    min-width: 60%;
-    max-width: 80%;
+    width: 100%;
     text-align: center;
-    margin-bottom: 48px;
+    margin: 24px;
+  }
+
+  .model-info {
+    background-color: #ffffffc0;
+    border-radius: 4px;
+    margin: 0 24px;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }
 </style>

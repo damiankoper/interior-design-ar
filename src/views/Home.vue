@@ -1,7 +1,7 @@
 <template>
   <el-container>
     <el-main class="home">
-      <el-row>
+      <el-row style="margin-top: -48px">
         <el-col :span="24">
           <h1 class="logo">
             <span>ID</span>
