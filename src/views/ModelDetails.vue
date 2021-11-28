@@ -21,7 +21,6 @@
               <h1>{{ meta.name }}</h1>
             </el-col>
             <el-col :span="NaN">
-              <!-- TODO: "AR not supported" el-tooltip to the left-->
               <el-button
                 @click="onARClick"
                 :disabled="!isXrSupported"

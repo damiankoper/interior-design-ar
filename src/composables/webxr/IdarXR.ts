@@ -32,10 +32,6 @@ export class IdarXR implements ServiceLifecycle {
 
     if (initialSelectGroup) {
       this.sceneModeController.setSelectMode(initialSelectGroup);
-      this.overlayService.showToast(
-        // TODO: swipe
-        "Tap screen to place model. Swipe right/left to rotate it"
-      );
     } else {
       this.sceneModeController.setViewMode();
       this.overlayService.showToast(

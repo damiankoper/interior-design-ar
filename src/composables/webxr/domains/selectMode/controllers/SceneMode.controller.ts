@@ -20,6 +20,7 @@ const invalidHittest = "Move around to detect your surroundings";
 @Service()
 export class SceneModeController implements SessionLifecycle {
   private readonly raycaster = new THREE.Raycaster();
+  private tipShown = false;
   private reticle = new Reticle();
   private _mode: SceneMode = SceneMode.VIEW;
 
@@ -162,6 +163,13 @@ export class SceneModeController implements SessionLifecycle {
                 this.objectSelected.userData.panRotateY
               )
             );
+
+            if (!this.tipShown) {
+              this.tipShown = true;
+              this.overlayService.showToast(
+                "Tap screen to place model. Pan right/left to rotate it"
+              );
+            }
           } else {
             this.objectSelected.visible = false;
             this.overlayService.showToast(invalidHittest, 1000);

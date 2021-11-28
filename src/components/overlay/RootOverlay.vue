@@ -66,7 +66,7 @@
             </div>
           </transition>
         </el-row>
-        <!-- TODO: Leszek: check if this transition kills performance -->
+        <!-- TODO: Leszek: check if transitions kill performance -->
         <!-- <transition name="select"> -->
         <div class="object-select" v-if="objectMenu">
           <div
@@ -80,8 +80,6 @@
             @beforexrselect.prevent
           >
             <!-- TODO: models[0] for test purposes -->
-            <!-- TODO: iterate over props.objects when available -->
-            <!-- TODO: later model object instead of 'i' in $emit -->
             <img src="/models/SheenChair/SheenChair.png" />
           </div>
         </div>

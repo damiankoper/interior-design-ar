@@ -4,7 +4,6 @@
     <div class="label">
       <h2 class="hidden-sm-and-down">{{ model.meta.name }}</h2>
       <h3 class="hidden-md-and-up">{{ model.meta.name }}</h3>
-      <!-- TODO: "AR not supported" el-tooltip to the left-->
       <el-button
         @click.prevent.stop="onARClick"
         :disabled="!isXrSupported"

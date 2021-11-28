@@ -1,4 +1,3 @@
-import { ISimpleEvent } from "ste-simple-events";
 import * as THREE from "three";
 
 /** Internal representation of saved scene */
@@ -9,14 +8,9 @@ export interface SessionObject {
   matrix: THREE.Matrix4Tuple;
 }
 
-// TODO: Create SessionService implementing this
+// TODO: Create SessionService implementing this in idSystem/services
+// TODO: Move this file to idSystem/interfaces
 export interface SessionPersistance {
-  /**
-   * Computed progress event of all async fetching initiated in getGroup method.
-   * TODO(small refactor): Extract this prop to separate e.g. LoadProgress interface and implement here and in IdModel replacing `modelLoadProgress`. Readonly property can be implemented using getter `get xyz()`.
-   */
-  readonly loadProgress: ISimpleEvent<ProgressEvent>;
-
   /**
    * Saves scene as SessionObject[] in the localStorage.
    * NOTE: THREE.Scene extends THREE.Object3D and is simmilar to THREE.Group.
