@@ -9,29 +9,32 @@
     @close="stopAR"
     @delete="deleteModel"
     @select:model="selectModel"
+    :models="models"
     :toast="toast"
     :onSceneModeChange="onSceneModeChange"
+    :progress="progress"
+    :progressVisible="progressVisible"
   />
 </template>
 
 <script lang="ts">
-import {
-  defineComponent,
-  onMounted,
-  onUnmounted,
-  provide,
-  reactive,
-} from "vue";
-import { IdModelsInjectKey } from "@/symbols";
+import { defineComponent, onMounted, onUnmounted, reactive } from "vue";
 
-import { IdModel } from "@/composables/idSystem/IdModel";
+import { IdModelsService } from "@/composables/idSystem/services/IdModels.service";
 import RootOverlay from "./components/overlay/RootOverlay.vue";
 import { useXR } from "./composables/webxr/composables/useXR";
 import { Toast } from "./composables/webxr/interfaces/Toast.interface";
+import Container from "typedi";
+import { useModelsProgress } from "./composables/idSystem/composables/useModelsProgress";
 
 export default defineComponent({
   components: { RootOverlay: RootOverlay },
   setup() {
+    const { progress, progressVisible } = useModelsProgress();
+
+    const idModelsService = Container.get(IdModelsService);
+    idModelsService.init(["SheenChair"]);
+
     const toast = reactive<Toast>({
       visible: false,
       message: "",
@@ -57,10 +60,8 @@ export default defineComponent({
       stopAR();
     });
 
-    const idModels: IdModel[] = ["SheenChair"].map((id) => new IdModel(id));
-    provide(IdModelsInjectKey, idModels);
-
     return {
+      models: idModelsService.getIdModels(),
       stopAR,
       isXrSupported,
       startAR,
@@ -70,6 +71,8 @@ export default defineComponent({
       onSessionEnd,
       onSessionStart,
       onSceneModeChange,
+      progress,
+      progressVisible,
     };
   },
 });

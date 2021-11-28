@@ -1,12 +1,15 @@
-import { ref, computed, inject } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import { IdModelsInjectKey } from "@/symbols";
 import { IdModelMeta } from "./idSystem/interfaces/IdModelMeta.interface.";
+import Container from "typedi";
+import { IdModelsService } from "./idSystem/services/IdModels.service";
 
 export function useModelSearch() {
   const searchValue = ref("");
-  const xmodels = inject(IdModelsInjectKey, []);
-  const metaModels = computed(() => xmodels.map((model) => model.meta));
+  const idModelsService = Container.get(IdModelsService);
+  const metaModels = computed(() =>
+    idModelsService.getIdModels().map((model) => model.meta)
+  );
 
   const querySearch = (queryString: string, cb: (a: IdModelMeta[]) => void) => {
     const results = queryString

@@ -24,13 +24,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, inject, PropType } from "vue";
-import { IdModelsInjectKey } from "@/symbols";
+import { defineComponent, ref, computed, PropType } from "vue";
 
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
 import ModelTile from "@/components/ModelTile.vue";
 import * as THREE from "three";
+import Container from "typedi";
+import { IdModelsService } from "@/composables/idSystem/services/IdModels.service";
 
 export default defineComponent({
   components: { Header, Footer, ModelTile },
@@ -45,13 +46,16 @@ export default defineComponent({
     },
   },
   setup() {
-    const models = inject(IdModelsInjectKey, []);
+    const idModelsService = Container.get(IdModelsService);
 
     const modelsFiltered = computed(() => {
-      return models.filter(
-        (model) =>
-          !filter.value || model.meta.name?.toLowerCase().includes(filter.value)
-      );
+      return idModelsService
+        .getIdModels()
+        .filter(
+          (model) =>
+            !filter.value ||
+            model.meta.name?.toLowerCase().includes(filter.value)
+        );
     });
 
     const filter = ref("");

@@ -3,7 +3,7 @@ import { Navigator } from "webxr";
 import { IdarXR } from "@/composables/webxr/IdarXR";
 import Container from "typedi";
 import * as THREE from "three";
-import { IdModel } from "@/composables/idSystem/IdModel";
+import { IdModel } from "@/composables/idSystem/models/IdModel";
 import { Toast } from "../interfaces/Toast.interface";
 
 export function useXR(toast: Toast) {

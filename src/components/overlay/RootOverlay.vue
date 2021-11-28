@@ -1,15 +1,18 @@
 <template>
   <Teleport to="body">
-    <div
-      id="overlay"
-      style="
-        display: none;
-        flex-direction: column;
-        justify-content: space-between;
-        pointer-events: none;
-      "
-    >
-      <el-row justify="space-between" style="padding: 24px">
+    <div id="overlay" style="display: none; pointer-events: none">
+      <el-progress
+        v-if="progressVisible"
+        text-inside
+        class="progress"
+        :percentage="Math.round(progress * 100)"
+        :show-text="false"
+        stroke-linecap="butt"
+      />
+      <el-row
+        justify="space-between"
+        style="position: absolute; top: 0; padding: 24px; width: 100%"
+      >
         <el-button
           type="primary"
           @click="$emit('close')"
@@ -18,8 +21,8 @@
           <font-awesome-icon size="lg" :icon="['fas', 'times']" />
         </el-button>
         <transition name="el-fade-in">
-          <div class="model-info" v-if="selectedModelMeta">
-            {{ selectedModelMeta.name }}
+          <div class="model-info" v-if="selectedModelMeta || progressVisible">
+            {{ progressVisible ? "Loading..." : selectedModelMeta.name }}
           </div>
         </transition>
         <div>
@@ -55,7 +58,7 @@
           </el-button>
         </div>
       </el-row>
-      <div>
+      <div style="position: absolute; bottom: 0; width: 100%">
         <el-row justify="center">
           <transition name="el-fade-in">
             <div class="toast" v-if="toast.visible">
@@ -63,22 +66,26 @@
             </div>
           </transition>
         </el-row>
-        <transition name="select">
-          <div class="object-select" v-if="objectMenu" v-loading="loading">
-            <div
-              v-for="i in 10"
-              :key="i"
-              class="object-container"
-              @click="$emit('select:model', models[0])"
-              @beforexrselect.prevent
-            >
-              <!-- TODO: models[0] for test purposes -->
-              <!-- TODO: iterate over props.objects when available -->
-              <!-- TODO: later model object instead of 'i' in $emit -->
-              <img src="/models/SheenChair/SheenChair.png" />
-            </div>
+        <!-- TODO: Leszek: check if this transition kills performance -->
+        <!-- <transition name="select"> -->
+        <div class="object-select" v-if="objectMenu">
+          <div
+            v-for="i in 10"
+            :key="i"
+            class="object-container"
+            @click="
+              $emit('select:model', models[0]);
+              objectMenu = false;
+            "
+            @beforexrselect.prevent
+          >
+            <!-- TODO: models[0] for test purposes -->
+            <!-- TODO: iterate over props.objects when available -->
+            <!-- TODO: later model object instead of 'i' in $emit -->
+            <img src="/models/SheenChair/SheenChair.png" />
           </div>
-        </transition>
+        </div>
+        <!-- </transition> -->
       </div>
     </div>
   </Teleport>
@@ -86,28 +93,23 @@
 
 <script lang="ts">
 import { IdModelMeta } from "@/composables/idSystem/interfaces/IdModelMeta.interface.";
+import { IdModel } from "@/composables/idSystem/models/IdModel";
 import {
   SceneMode,
   SceneModeController,
 } from "@/composables/webxr/domains/selectMode/controllers/SceneMode.controller";
 import { Toast } from "@/composables/webxr/interfaces/Toast.interface";
-import { IdModelsInjectKey } from "@/symbols";
 import { EventDispatcher } from "ste-events";
-import {
-  defineComponent,
-  inject,
-  onMounted,
-  onUnmounted,
-  PropType,
-  ref,
-} from "vue";
+import { defineComponent, onMounted, onUnmounted, PropType, ref } from "vue";
 
 export default defineComponent({
   props: {
     sceneAvailable: { type: Boolean, default: false },
     toast: { type: Object as PropType<Toast>, required: true },
-    loading: { type: Boolean, default: false },
+    progress: { type: Number, default: 0 },
+    progressVisible: { type: Boolean, default: false },
     objects: { type: Array as PropType<unknown>, default: () => [] },
+    models: { type: Array as PropType<IdModel[]>, required: true },
     onSceneModeChange: {
       type: Object as PropType<EventDispatcher<SceneMode, SceneModeController>>,
       required: true,
@@ -118,8 +120,6 @@ export default defineComponent({
     const objectMenu = ref(false);
     const objectMenuDelete = ref(false);
     const selectedModelMeta = ref<IdModelMeta | null>(null);
-
-    const models = inject(IdModelsInjectKey, []);
 
     const events: (() => void)[] = [];
     onMounted(() => {
@@ -146,7 +146,6 @@ export default defineComponent({
     return {
       objectMenu,
       objectMenuDelete,
-      models,
       selectedModelMeta,
     };
   },
@@ -163,6 +162,13 @@ export default defineComponent({
     opacity: 0.75;
     pointer-events: all;
   }
+  .progress {
+    width: 100%;
+    position: absolute;
+    top: 0;
+    opacity: 0.75;
+  }
+
   $height: 80px;
   $padding: 16px;
   .object-select {

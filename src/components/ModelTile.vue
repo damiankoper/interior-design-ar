@@ -21,7 +21,7 @@
 import { defineComponent, PropType, computed } from "vue";
 import { useRouter } from "vue-router";
 
-import { IdModel } from "@/composables/idSystem/IdModel";
+import { IdModel } from "@/composables/idSystem/models/IdModel";
 import * as THREE from "three";
 
 export default defineComponent({

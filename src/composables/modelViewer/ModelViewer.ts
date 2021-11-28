@@ -2,7 +2,7 @@ import { Service } from "typedi";
 import * as THREE from "three";
 import { ServiceLifecycle } from "../webxr/interfaces/ServiceLifecycle.interface";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { IdModel } from "../idSystem/IdModel";
+import { IdModel } from "../idSystem/models/IdModel";
 
 @Service()
 export class ModelViewer implements ServiceLifecycle {
@@ -108,7 +108,6 @@ export class ModelViewer implements ServiceLifecycle {
   }
 
   public animate() {
-    console.log("[ModelViewer] Loop");
     if (!this.destroyed)
       this.requestId = requestAnimationFrame(this.animate.bind(this));
     this.controls.update();

@@ -4,7 +4,16 @@
     <el-main v-if="model">
       <div class="model-details">
         <div ref="viewerRoot" class="viewer-root">
-          <div class="viewer-root-overlay" />
+          <div class="viewer-root-overlay">
+            <transition name="el-fade-in">
+              <el-progress
+                type="circle"
+                :percentage="Math.round(progress * 100)"
+                :stroke-width="8"
+                v-if="progressVisible"
+              />
+            </transition>
+          </div>
         </div>
         <div class="model-data">
           <el-row align="middle" class="" justify="space-between">
@@ -43,6 +52,7 @@ import { defineComponent, onMounted, PropType, ref } from "vue";
 import Header from "@/components/Header.vue";
 import Footer from "@/components/Footer.vue";
 import { useModelViewer } from "@/composables/modelViewer/composables/useModelViewer";
+import { useModelsProgress } from "@/composables/idSystem/composables/useModelsProgress";
 import * as THREE from "three";
 import { SignalDispatcher } from "ste-signals";
 import { onBeforeRouteLeave } from "vue-router";
@@ -70,6 +80,7 @@ export default defineComponent({
   setup(props) {
     const viewerRoot = ref<HTMLDivElement | null>(null);
     const { model, meta, init, destroy } = useModelViewer(viewerRoot);
+    const { progress, progressVisible } = useModelsProgress();
 
     const events: (() => void)[] = [];
     onMounted(() => {
@@ -85,6 +96,8 @@ export default defineComponent({
       viewerRoot,
       model,
       meta,
+      progress,
+      progressVisible,
       async onARClick() {
         if (model.value) props.startAR(await model.value.getModel());
       },
@@ -136,7 +149,11 @@ export default defineComponent({
       bottom: 0;
       left: 0;
       right: 0;
+      transition: background 0.3s ease-in-out;
       background: linear-gradient(#00000000 99%, #00000010 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     z-index: 1;
   }

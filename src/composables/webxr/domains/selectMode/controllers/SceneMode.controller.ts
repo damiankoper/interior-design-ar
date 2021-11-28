@@ -15,8 +15,7 @@ export enum SceneMode {
   VIEW,
 }
 
-const invalidHittest = () => "Move around to detect your surroundings";
-//const loadingModel = (percent:number) => `Loading furniture (${percent}%)`;
+const invalidHittest = "Move around to detect your surroundings";
 
 @Service()
 export class SceneModeController implements SessionLifecycle {
@@ -24,7 +23,6 @@ export class SceneModeController implements SessionLifecycle {
   private reticle = new Reticle();
   private _mode: SceneMode = SceneMode.VIEW;
 
-  private panRotateY = 0;
   private objectSelected: THREE.Object3D | null = null;
   public get selectedIdModelMeta(): IdModelMeta | null {
     return this.objectSelected?.userData?.meta || null;
@@ -42,7 +40,7 @@ export class SceneModeController implements SessionLifecycle {
   private isInitialized = false;
   private gestureLastEuler = new THREE.Euler();
   private gestureStartTime = 0;
-  readonly tapMaxTime = 300;
+  readonly tapMaxTime = 150;
 
   constructor(
     public overlayService: OverlayXRService,
@@ -145,7 +143,7 @@ export class SceneModeController implements SessionLifecycle {
           const controller = this.sceneService.controller;
           if (this.isGesture && gestureTime >= this.tapMaxTime) {
             if (this.isInitialized) {
-              this.panRotateY +=
+              this.objectSelected.userData.panRotateY +=
                 (this.gestureLastEuler.y - controller.rotation.y) * 10;
             }
             this.gestureLastEuler.copy(controller.rotation);
@@ -160,11 +158,13 @@ export class SceneModeController implements SessionLifecycle {
             this.objectSelected.visible = true;
             this.objectSelected.matrix.copy(matrix);
             this.objectSelected.matrix.multiply(
-              new THREE.Matrix4().makeRotationY(this.panRotateY)
+              new THREE.Matrix4().makeRotationY(
+                this.objectSelected.userData.panRotateY
+              )
             );
           } else {
             this.objectSelected.visible = false;
-            this.overlayService.showToast(invalidHittest(), 1000);
+            this.overlayService.showToast(invalidHittest, 1000);
           }
         }
         break;
