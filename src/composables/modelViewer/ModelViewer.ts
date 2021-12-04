@@ -12,6 +12,7 @@ export class ModelViewer implements ServiceLifecycle {
   private camera: THREE.PerspectiveCamera;
   private controls: OrbitControls;
   private model?: THREE.Group;
+  private floorMesh?: THREE.Mesh;
   private requestId = 0;
 
   private destroyed = false;
@@ -22,9 +23,7 @@ export class ModelViewer implements ServiceLifecycle {
     this.camera = this.initCamera();
     this.controls = this.initControls(this.camera, this.renderer);
     this.initLights(this.scene);
-    // TODO init fake shadow (plane with texture): radial gradient(black to transparent) and (choose):
-    // * add to scene here and manage it here
-    // * add to the model group and unify behaviour of shadow for viewer and AR
+    this.initFloor(this.scene);
   }
 
   public async init(container: HTMLDivElement, model: IdModel): Promise<void> {
@@ -32,7 +31,7 @@ export class ModelViewer implements ServiceLifecycle {
     this.container = container;
     this.setSize();
 
-    this.model = await model.getModel();
+    this.model = await model.getModel("real");
 
     this.adjustScene(this.model);
     this.scene.add(this.model);
@@ -48,14 +47,18 @@ export class ModelViewer implements ServiceLifecycle {
   }
 
   public adjustScene(model: THREE.Group) {
-    const size = new THREE.Vector3();
     const box = new THREE.Box3().setFromObject(model);
+    const size = new THREE.Vector3();
+    const sphere = new THREE.Sphere();
     box.getSize(size);
-    model.position.setY(-size.y / 2);
-    model.updateMatrix();
+    box.getBoundingSphere(sphere);
 
-    //TODO: the bigger the bounding box the further camera is
-    this.camera.position.set(1, 0.8, 1).multiplyScalar(0.7);
+    const offsetY = size.y / 2;
+    this.controls.target.set(0, offsetY, 0);
+    const r = sphere.radius;
+    this.controls.minDistance = r;
+    this.camera.position.set(r, r + offsetY, r).setLength(r * 3);
+    this.floorMesh?.scale.copy(new THREE.Vector3(r * 2, r * 2, r * 2));
   }
 
   private setSize() {
@@ -68,11 +71,10 @@ export class ModelViewer implements ServiceLifecycle {
 
   private initControls(camera: THREE.Camera, renderer: THREE.Renderer) {
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.center = new THREE.Vector3(1, 1, 1);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
     controls.screenSpacePanning = false;
-    controls.minDistance = 1;
+    controls.minDistance = 0;
     controls.maxDistance = 5;
     controls.autoRotate = true;
     controls.maxPolarAngle = Math.PI / 2;
@@ -85,6 +87,7 @@ export class ModelViewer implements ServiceLifecycle {
       alpha: true,
     });
     renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
     return renderer;
   }
 
@@ -100,11 +103,26 @@ export class ModelViewer implements ServiceLifecycle {
 
   private initLights(scene: THREE.Scene) {
     const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.5);
+    dirLight1.castShadow = true;
     dirLight1.position.set(10, 10, 10);
+    dirLight1.target.position.set(0, 0, 0);
+    dirLight1.shadow.mapSize.set(2048, 2048);
     scene.add(dirLight1);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
+  }
+
+  private initFloor(scene: THREE.Scene) {
+    const floorGeometry = new THREE.CircleBufferGeometry(0.5, 128);
+    floorGeometry.rotateX(-Math.PI / 2);
+    const floorMaterial = new THREE.MeshPhongMaterial({
+      color: "#0d84ff",
+      shininess: 120,
+    });
+    this.floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
+    this.floorMesh.receiveShadow = true;
+    scene.add(this.floorMesh);
   }
 
   public animate() {

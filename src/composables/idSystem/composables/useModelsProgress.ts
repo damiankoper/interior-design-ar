@@ -3,7 +3,7 @@ import { IdModelsService } from "../services/IdModels.service";
 import { ref, onMounted, onUnmounted, computed } from "vue";
 import { onBeforeRouteLeave } from "vue-router";
 
-export function useModelsProgress() {
+export function useModelsProgress(ignoreLeave = false) {
   const service = Container.get(IdModelsService);
   const events: (() => void)[] = [];
   const progress = ref(1); // loaded by default
@@ -25,9 +25,10 @@ export function useModelsProgress() {
     );
   });
 
-  onBeforeRouteLeave(() => {
-    events.forEach((e) => e());
-  });
+  if (!ignoreLeave)
+    onBeforeRouteLeave(() => {
+      events.forEach((e) => e());
+    });
 
   onUnmounted(() => {
     events.forEach((e) => e());

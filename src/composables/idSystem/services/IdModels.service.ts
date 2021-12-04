@@ -2,6 +2,9 @@ import { ServiceLifecycle } from "@/composables/webxr/interfaces/ServiceLifecycl
 import { SimpleEventDispatcher } from "ste-simple-events";
 import { Service } from "typedi";
 import { IdModel } from "../models/IdModel";
+import * as THREE from "three";
+
+const textureLoader = new THREE.TextureLoader();
 
 @Service()
 export class IdModelsService implements ServiceLifecycle {
@@ -15,8 +18,20 @@ export class IdModelsService implements ServiceLifecycle {
   }
 
   public async init(ids: string[]): Promise<void> {
+    const shadowTexture = textureLoader.load("/roundshadow.png");
+    const shadowMaterial = new THREE.MeshBasicMaterial({
+      map: shadowTexture,
+      transparent: true,
+      depthWrite: false,
+    });
+    const shadowGeometry = new THREE.PlaneBufferGeometry(1, 1);
+    shadowGeometry.rotateX(-Math.PI / 2);
+
     ids.forEach((id) => {
-      const model = new IdModel(id);
+      const model = new IdModel(id, {
+        material: shadowMaterial,
+        geometry: shadowGeometry,
+      });
       this.idModels.set(id, model);
       this.events.push(
         model.onLoadProgress.sub(this.dispatchProgress.bind(this))
@@ -39,10 +54,6 @@ export class IdModelsService implements ServiceLifecycle {
 
   public getIdModels(): IdModel[] {
     return [...this.idModels.values()];
-  }
-
-  public allLoaded() {
-    return this.progress.size === 0;
   }
 
   private dispatchProgress(progress: ProgressEvent) {

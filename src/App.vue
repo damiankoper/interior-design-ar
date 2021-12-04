@@ -30,7 +30,7 @@ import { useModelsProgress } from "./composables/idSystem/composables/useModelsP
 export default defineComponent({
   components: { RootOverlay: RootOverlay },
   setup() {
-    const { progress, progressVisible } = useModelsProgress();
+    const { progress, progressVisible } = useModelsProgress(true);
 
     const idModelsService = Container.get(IdModelsService);
     idModelsService.init(["SheenChair"]);
