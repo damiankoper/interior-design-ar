@@ -66,24 +66,22 @@
             </div>
           </transition>
         </el-row>
-        <!-- TODO: Leszek: check if transitions kill performance -->
-        <!-- <transition name="select"> -->
-        <div class="object-select" v-if="objectMenu">
-          <div
-            v-for="i in 10"
-            :key="i"
-            class="object-container"
-            @click="
-              $emit('select:model', models[0]);
-              objectMenu = false;
-            "
-            @beforexrselect.prevent
-          >
-            <!-- TODO: models[0] for test purposes -->
-            <img src="/models/SheenChair/SheenChair.png" />
+        <transition name="select">
+          <div class="object-select" v-if="objectMenu">
+            <div
+              v-for="(model, index) in models"
+              :key="index"
+              class="object-container"
+              @click="
+                $emit('select:model', model);
+                objectMenu = false;
+              "
+              @beforexrselect.prevent
+            >
+              <img :src="model.meta.thumbnailPath" />
+            </div>
           </div>
-        </div>
-        <!-- </transition> -->
+        </transition>
       </div>
     </div>
   </Teleport>
