@@ -16,7 +16,7 @@
     "lodash": "^4.17.21",
     "reflect-metadata": "^0.1.13",
     "strongly-typed-events": "^2.1.14",
-    "three": "^0.133.1",
+    "three": "0.130.0",
     "typedi": "^0.10.0",
     "vue": "^3.0.0",
     "vue-router": "^4.0.0-0"

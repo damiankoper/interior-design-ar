@@ -1,0 +1,6 @@
+{
+  "name": "Standing mirror",
+  "description": "<p>Mirror</p>",
+  "castsShadow": true,
+  "vertical": false
+}

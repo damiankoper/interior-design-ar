@@ -20,7 +20,6 @@ export function useModelsProgress(ignoreLeave = false) {
     events.push(
       service.onLoadProgress.sub((p) => {
         progress.value = p;
-        console.log(p);
       })
     );
   });

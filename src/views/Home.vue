@@ -1,35 +1,37 @@
 <template>
   <el-container>
     <el-main class="home">
-      <el-row style="margin-top: -48px">
-        <el-col :span="24">
-          <h1 class="logo">
-            <span>ID</span>
-            <span>AR</span>
-          </h1>
-          <span class="sublogo">interior design made easy for everyone</span>
-        </el-col>
-      </el-row>
-      <el-row>
-        <el-col :span="24">
-          <router-link to="/browser">
-            <el-button type="primary">
-              <font-awesome-icon size="2x" :icon="['fas', 'cubes']" />
-              Browse models
+      <el-card style="border-radius: 16px; max-width: 400px">
+        <el-row>
+          <el-col :span="24">
+            <h1 class="logo">
+              <span>ID</span>
+              <span>AR</span>
+            </h1>
+            <span class="sublogo">interior design made easy for everyone</span>
+          </el-col>
+        </el-row>
+        <el-row>
+          <el-col :span="24">
+            <router-link to="/browser">
+              <el-button type="primary">
+                <font-awesome-icon size="2x" :icon="['fas', 'cubes']" />
+                Browse models
+              </el-button>
+            </router-link>
+          </el-col>
+          <el-col :span="24">
+            <el-button
+              type="primary"
+              @click="startAR()"
+              :disabled="!isXrSupported"
+            >
+              <font-awesome-icon size="2x" :icon="['fas', 'vr-cardboard']" />
+              {{ isXrSupported ? "Design in AR" : "AR not supported" }}
             </el-button>
-          </router-link>
-        </el-col>
-        <el-col :span="24">
-          <el-button
-            type="primary"
-            @click="startAR()"
-            :disabled="!isXrSupported"
-          >
-            <font-awesome-icon size="2x" :icon="['fas', 'vr-cardboard']" />
-            {{ isXrSupported ? "Design in AR" : "AR not supported" }}
-          </el-button>
-        </el-col>
-      </el-row>
+          </el-col>
+        </el-row>
+      </el-card>
     </el-main>
     <Footer />
   </el-container>
@@ -60,22 +62,20 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .el-container {
-  background: rgb(110, 226, 245);
-  background: linear-gradient(
-    147deg,
-    rgb(255, 255, 255) 0%,
-    rgb(174, 212, 255) 100%
-  );
+  background: rgb(245, 232, 110);
+  background: linear-gradient(147deg, rgb(255, 255, 255) 0%, #0d84ff 100%);
 }
 
 .home {
   display: flex;
   align-items: center;
-  justify-content: center;
   flex-direction: column;
   height: calc(100vh - 32px);
   text-align: center;
-
+  padding-top: 8px;
+  @media only screen and (min-width: 1200px) {
+    justify-content: center;
+  }
   .logo {
     user-select: none;
     margin: 0;

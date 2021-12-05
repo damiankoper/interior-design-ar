@@ -4,6 +4,19 @@ import { ServiceLifecycle } from "../webxr/interfaces/ServiceLifecycle.interface
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { IdModel } from "../idSystem/models/IdModel";
 
+const r = "https://threejs.org/examples/textures/cube/Bridge2/";
+const mapUrls = [
+  r + "posx.jpg",
+  r + "negx.jpg",
+  r + "posy.jpg",
+  r + "negy.jpg",
+  r + "posz.jpg",
+  r + "negz.jpg",
+];
+
+const textureCube = new THREE.CubeTextureLoader().load(mapUrls);
+textureCube.format = THREE.RGBFormat;
+
 @Service()
 export class ModelViewer implements ServiceLifecycle {
   private container?: HTMLDivElement;
@@ -33,11 +46,13 @@ export class ModelViewer implements ServiceLifecycle {
 
     this.model = await model.getModel("real");
 
-    this.adjustScene(this.model);
+    this.adjustScene(this.model, model.meta.vertical);
     this.scene.add(this.model);
 
     container.appendChild(this.renderer.domElement);
     window.addEventListener("resize", this.setSize.bind(this), false);
+
+    this.scene.environment = textureCube;
   }
 
   public async destroy(): Promise<void> {
@@ -46,19 +61,27 @@ export class ModelViewer implements ServiceLifecycle {
     if (this.model) this.scene.remove(this.model);
   }
 
-  public adjustScene(model: THREE.Group) {
+  public adjustScene(model: THREE.Group, vertical: boolean) {
     const box = new THREE.Box3().setFromObject(model);
     const size = new THREE.Vector3();
     const sphere = new THREE.Sphere();
     box.getSize(size);
     box.getBoundingSphere(sphere);
+    const r = sphere.radius;
+    const targetTranslation = new THREE.Matrix4()
+      .makeRotationX(Math.PI / 2)
+      .multiply(new THREE.Matrix4().makeTranslation(0, 0, -r));
 
     const offsetY = size.y / 2;
     this.controls.target.set(0, offsetY, 0);
-    const r = sphere.radius;
     this.controls.minDistance = r;
-    this.camera.position.set(r, r + offsetY, r).setLength(r * 3);
+    this.camera.position.set(r, r, r).setLength(r * 3);
     this.floorMesh?.scale.copy(new THREE.Vector3(r * 2, r * 2, r * 2));
+
+    if (vertical) {
+      model.matrix.multiply(targetTranslation);
+      this.controls.target.applyMatrix4(targetTranslation);
+    }
   }
 
   private setSize() {
@@ -88,6 +111,7 @@ export class ModelViewer implements ServiceLifecycle {
     });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
+    renderer.physicallyCorrectLights = true;
     return renderer;
   }
 
@@ -102,23 +126,24 @@ export class ModelViewer implements ServiceLifecycle {
   }
 
   private initLights(scene: THREE.Scene) {
-    const dirLight1 = new THREE.DirectionalLight(0xffffff, 0.5);
+    const dirLight1 = new THREE.DirectionalLight(0xffffff, 3);
     dirLight1.castShadow = true;
     dirLight1.position.set(10, 10, 10);
     dirLight1.target.position.set(0, 0, 0);
     dirLight1.shadow.mapSize.set(2048, 2048);
     scene.add(dirLight1);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
     scene.add(ambientLight);
   }
 
   private initFloor(scene: THREE.Scene) {
-    const floorGeometry = new THREE.CircleBufferGeometry(0.5, 128);
-    floorGeometry.rotateX(-Math.PI / 2);
-    const floorMaterial = new THREE.MeshPhongMaterial({
+    const floorGeometry = new THREE.CylinderBufferGeometry(0.5, 0.5, 0.05, 128);
+    floorGeometry.translate(0, -0.025, 0);
+    const floorMaterial = new THREE.MeshStandardMaterial({
       color: "#0d84ff",
-      shininess: 120,
+      roughness: 0.5,
+      metalness: 0,
     });
     this.floorMesh = new THREE.Mesh(floorGeometry, floorMaterial);
     this.floorMesh.receiveShadow = true;

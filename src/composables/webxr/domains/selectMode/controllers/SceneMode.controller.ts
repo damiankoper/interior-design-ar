@@ -9,6 +9,7 @@ import { Service } from "typedi";
 import { Reticle } from "../models/Reticle.model";
 import { IdModelMeta } from "@/composables/idSystem/interfaces/IdModelMeta.interface.";
 import { EventDispatcher } from "ste-events";
+import { LightXRService } from "@/composables/webxr/services/LightXR.service";
 
 export enum SceneMode {
   SELECT,
@@ -20,9 +21,18 @@ const invalidHittest = "Move around to detect your surroundings";
 @Service()
 export class SceneModeController implements SessionLifecycle {
   private readonly raycaster = new THREE.Raycaster();
-  private tipShown = false;
   private reticle = new Reticle();
   private _mode: SceneMode = SceneMode.VIEW;
+
+  readonly tapMaxTime = 150;
+  private isGesture = false;
+  private isInitialized = false;
+  private gestureLastDirection = new THREE.Vector3();
+  private gestureStartTime = 0;
+  private tipShown = false;
+
+  private selectStartHandler?: () => Promise<void>;
+  private selectEndHandler?: () => Promise<void>;
 
   private objectSelected: THREE.Object3D | null = null;
   public get selectedIdModelMeta(): IdModelMeta | null {
@@ -37,16 +47,12 @@ export class SceneModeController implements SessionLifecycle {
     return this._onSceneModeChange.asEvent();
   }
 
-  private isGesture = false;
-  private isInitialized = false;
-  private gestureLastEuler = new THREE.Euler();
-  private gestureStartTime = 0;
-  readonly tapMaxTime = 150;
-
   constructor(
     public overlayService: OverlayXRService,
     public sesionService: SessionXRService,
-    public sceneService: SceneXRService
+    public sceneService: SceneXRService,
+    public hitTestService: HitTestXRService,
+    public lightService: LightXRService
   ) {}
 
   public get mode() {
@@ -56,29 +62,40 @@ export class SceneModeController implements SessionLifecycle {
   public setSelectMode(object: THREE.Group, addToScene = true) {
     this._mode = SceneMode.SELECT;
     this.objectSelected = object;
-    if (addToScene) this.sceneService.scene.add(object);
+    this.hitTestService.removeAnchor(this.objectSelected);
+    if (addToScene) {
+      this.sceneService.scene.add(object);
+    }
+    console.log(object);
 
     this._onSceneModeChange.dispatch(this._mode, this);
   }
 
   public setViewMode(removeFromScene = true) {
-    this._mode = SceneMode.VIEW;
-    if (removeFromScene && this.objectSelected)
-      this.sceneService.scene.remove(this.objectSelected);
-    this.objectSelected = null;
+    if (this.objectSelected) {
+      if (removeFromScene) {
+        this.hitTestService.removeAnchor(this.objectSelected);
+        this.sceneService.scene.remove(this.objectSelected);
+      } else {
+        this.hitTestService.anchorObject(this.objectSelected);
+      }
+    }
 
+    this.objectSelected = null;
+    this._mode = SceneMode.VIEW;
     this._onSceneModeChange.dispatch(this._mode, this);
   }
 
   public init(scene: THREE.Scene): void {
     const controller = this.sceneService.controller;
 
-    controller.addEventListener("selectstart", () => {
+    this.selectStartHandler = async () => {
       this.gestureStartTime = performance.now();
       this.isGesture = true;
-    });
+    };
+    controller.addEventListener("selectstart", this.selectStartHandler);
 
-    controller.addEventListener("selectend", async () => {
+    this.selectEndHandler = async () => {
       const gestureTime = performance.now() - this.gestureStartTime;
       this.isGesture = false;
       this.isInitialized = false;
@@ -86,6 +103,8 @@ export class SceneModeController implements SessionLifecycle {
       switch (this._mode) {
         case SceneMode.VIEW: {
           const object = await this.getSelectedObject();
+          console.log(object);
+
           if (object) this.setSelectMode(object);
           break;
         }
@@ -93,7 +112,8 @@ export class SceneModeController implements SessionLifecycle {
           if (gestureTime < this.tapMaxTime && this.objectSelected?.visible)
             this.setViewMode(false);
       }
-    });
+    };
+    controller.addEventListener("selectend", this.selectEndHandler);
 
     this.reticle.init(scene);
   }
@@ -114,7 +134,7 @@ export class SceneModeController implements SessionLifecycle {
       .map((m) => ({
         model: m as THREE.Group,
         minDistance: Math.max(
-          ...this.raycaster.intersectObject(m).map((i) => i.distance)
+          ...this.raycaster.intersectObject(m, true).map((i) => i.distance)
         ),
       }))
       .filter((m) => isFinite(m.minDistance))
@@ -128,6 +148,7 @@ export class SceneModeController implements SessionLifecycle {
     referenceSpace: XRReferenceSpace,
     hitTestService: HitTestXRService
   ): void {
+    hitTestService.updateAnchors(frame, referenceSpace, this.objectSelected);
     const gestureTime = performance.now() - this.gestureStartTime;
 
     switch (this._mode) {
@@ -140,36 +161,14 @@ export class SceneModeController implements SessionLifecycle {
         {
           if (!this.objectSelected) return;
           this.reticle.hide();
-
-          const controller = this.sceneService.controller;
-          if (this.isGesture && gestureTime >= this.tapMaxTime) {
-            if (this.isInitialized) {
-              this.objectSelected.userData.panRotateY +=
-                (this.gestureLastEuler.y - controller.rotation.y) * 10;
-            }
-            this.gestureLastEuler.copy(controller.rotation);
-            this.isInitialized = true;
-          }
+          this.updateRotation(this.objectSelected, gestureTime);
 
           const matrix = hitTestService.getHitTransformMatrix(
             frame,
             referenceSpace
           );
           if (matrix) {
-            this.objectSelected.visible = true;
-            this.objectSelected.matrix.copy(matrix);
-            this.objectSelected.matrix.multiply(
-              new THREE.Matrix4().makeRotationY(
-                this.objectSelected.userData.panRotateY
-              )
-            );
-
-            if (!this.tipShown) {
-              this.tipShown = true;
-              this.overlayService.showToast(
-                "Tap screen to place model. Pan right/left to rotate it"
-              );
-            }
+            this.updateSelectedObject(this.objectSelected, matrix);
           } else {
             this.objectSelected.visible = false;
             this.overlayService.showToast(invalidHittest, 1000);
@@ -179,8 +178,61 @@ export class SceneModeController implements SessionLifecycle {
     }
   }
 
+  private updateRotation(objectSelected: THREE.Object3D, gestureTime: number) {
+    const controller = this.sceneService.controller;
+    if (this.isGesture && gestureTime >= this.tapMaxTime) {
+      const c = controller.matrixWorld;
+      const direction = new THREE.Vector3(0, 0, -1)
+        .applyMatrix4(new THREE.Matrix4().extractRotation(c))
+        .setY(0)
+        .normalize();
+      console.log(direction);
+
+      if (this.isInitialized) {
+        const angle = Math.acos(direction.dot(this.gestureLastDirection));
+        const cross = new THREE.Vector3().crossVectors(
+          direction,
+          this.gestureLastDirection
+        );
+        const angleSigned =
+          angle * Math.sign(new THREE.Vector3(0, 1, 0).dot(cross));
+        objectSelected.userData.panRotateY += angleSigned * 10;
+      }
+      this.gestureLastDirection.copy(direction);
+      this.isInitialized = true;
+    }
+  }
+
+  private updateSelectedObject(
+    objectSelected: THREE.Object3D,
+    matrix: THREE.Matrix4
+  ) {
+    objectSelected.visible = true;
+    objectSelected.matrix.copy(matrix);
+    objectSelected.matrix.multiply(
+      new THREE.Matrix4().makeRotationY(objectSelected.userData.panRotateY)
+    );
+
+    if (!this.tipShown) {
+      this.tipShown = true;
+      this.overlayService.showToast(
+        "Tap screen to place model. Pan right/left to rotate it"
+      );
+    }
+  }
+
   public destroy(scene: THREE.Scene): void {
     this.reticle.destroy(scene);
     this.setViewMode();
+    if (this.selectStartHandler)
+      this.sceneService.controller.removeEventListener(
+        "selectstart",
+        this.selectStartHandler
+      );
+    if (this.selectEndHandler)
+      this.sceneService.controller.removeEventListener(
+        "selectend",
+        this.selectEndHandler
+      );
   }
 }

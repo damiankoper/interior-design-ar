@@ -16,19 +16,23 @@
           </div>
         </div>
         <div class="model-data">
-          <el-row align="middle" class="" justify="space-between">
-            <el-col :span="NaN">
-              <h1>{{ meta.name }}</h1>
-            </el-col>
-            <el-col :span="NaN">
-              <el-button
-                @click="onARClick"
-                :disabled="!isXrSupported"
-                type="primary"
-                plain
+          <el-row align="middle" justify="space-between">
+            <el-col :span="24">
+              <el-row
+                justify="space-between"
+                style="flex-wrap: nowrap; align-items: baseline"
               >
-                <font-awesome-icon :icon="['fas', 'vr-cardboard']" />
-              </el-button>
+                <h1>{{ meta.name }}</h1>
+
+                <el-button
+                  @click="onARClick"
+                  :disabled="!isXrSupported"
+                  type="primary"
+                  plain
+                >
+                  <font-awesome-icon :icon="['fas', 'vr-cardboard']" />
+                </el-button>
+              </el-row>
             </el-col>
             <el-col :span="24" class="desc" v-html="meta.description" />
           </el-row>

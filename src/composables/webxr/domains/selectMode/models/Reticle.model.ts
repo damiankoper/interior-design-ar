@@ -2,18 +2,16 @@ import * as THREE from "three";
 import { HitTestXRService } from "../../../services/HitTestXR.service";
 import { XRFrame, XRReferenceSpace } from "three";
 import { SessionLifecycle } from "../../../interfaces/SessionLifecycle.interface";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+
+const loader = new GLTFLoader();
 
 export class Reticle implements SessionLifecycle {
-  private model?: THREE.Mesh;
+  private model?: THREE.Group;
+  private rotationY = 0;
 
-  public init(scene: THREE.Scene): void {
-    const geometry = new THREE.CircleBufferGeometry(0.15, 32);
-    geometry.rotateX(-Math.PI / 2);
-    const material = new THREE.MeshPhongMaterial({
-      color: 0x00ff00,
-      reflectivity: 0.75,
-    });
-    this.model = new THREE.Mesh(geometry, material);
+  public async init(scene: THREE.Scene): Promise<void> {
+    this.model = (await loader.loadAsync("/reticle.glb")).scene;
     this.model.matrixAutoUpdate = false;
     scene.add(this.model);
   }
@@ -33,8 +31,12 @@ export class Reticle implements SessionLifecycle {
     if (!this.model) return;
     const matrix = hitTestService.getHitTransformMatrix(frame, referenceSpace);
     if (matrix) {
+      this.rotationY = (this.rotationY + 0.05) % (Math.PI * 2);
       this.model.visible = true;
-      this.model.matrix = matrix;
+      this.model.matrix.copy(matrix);
+      this.model.matrix.multiply(
+        new THREE.Matrix4().makeRotationY(this.rotationY)
+      );
     } else {
       this.model.visible = false;
     }
@@ -42,13 +44,12 @@ export class Reticle implements SessionLifecycle {
 
   public destroy(scene: THREE.Scene): void {
     if (!this.model) return;
-
-    if (this.model.material instanceof THREE.Material)
-      this.model.material.dispose();
-
-    if (this.model.geometry instanceof THREE.BufferGeometry)
-      this.model.geometry.dispose();
-
     scene.remove(this.model);
+    this.model.traverse((sceneObject) => {
+      if (sceneObject instanceof THREE.Mesh) {
+        sceneObject.material.dispose();
+        sceneObject.geometry.dispose();
+      }
+    });
   }
 }

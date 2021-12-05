@@ -28,6 +28,7 @@ export class IdModel {
       name: null,
       description: null,
       castsShadow: false,
+      vertical: false,
     });
     this.initExtendedMeta();
   }
@@ -37,6 +38,7 @@ export class IdModel {
     this.meta.name = response.data.name;
     this.meta.description = response.data.description;
     this.meta.castsShadow = response.data.castsShadow;
+    this.meta.vertical = response.data.vertical;
   }
 
   public isLoaded(): boolean {
@@ -64,6 +66,13 @@ export class IdModel {
       });
     if (shadow === "simple" && this.meta.castsShadow && shadow)
       this.addShadow(model);
+
+    model.traverse((obj) => {
+      if (obj instanceof THREE.Mesh) {
+        if (obj.userData.castShadows) obj.castShadow = true;
+        if (obj.userData.receiveShadow) obj.receiveShadow = true;
+      }
+    });
 
     return model;
   }

@@ -51,6 +51,7 @@ export class SceneXRService implements ServiceLifecycle {
     });
     this._renderer.xr.enabled = true;
     this._renderer.physicallyCorrectLights = true;
+    this._renderer.outputEncoding = THREE.sRGBEncoding;
     this._renderer.xr.setReferenceSpaceType("local");
     this._scene = new THREE.Scene();
     this._camera = new THREE.PerspectiveCamera(
@@ -80,6 +81,7 @@ export class SceneXRService implements ServiceLifecycle {
   public async destroy(): Promise<void> {
     this.lightService.destroy();
     this.lifecycleObjects.forEach((o) => o.destroy(this.scene));
+    this.lifecycleObjects = [];
     this.scene.clear();
   }
 }

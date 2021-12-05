@@ -17,11 +17,9 @@ export function useModelViewer(container: Ref<HTMLDivElement | null>) {
 
   function destroy() {
     modelViewer.destroy();
-    console.log("[ModelViewer] destroy");
   }
 
   async function init() {
-    console.log("[ModelViewer] init");
     modelViewer.destroy();
 
     if (container.value && model.value) {

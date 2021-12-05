@@ -33,7 +33,17 @@ export default defineComponent({
     const { progress, progressVisible } = useModelsProgress(true);
 
     const idModelsService = Container.get(IdModelsService);
-    idModelsService.init(["SheenChair"]);
+    idModelsService.init([
+      "SheenChair",
+      "Picture",
+      "Mirror",
+      /*       "Rug",
+      "Lamp",
+      "HangingMirror",
+      "Commode",
+      "CoffeTable",
+      "Closet", */
+    ]);
 
     const toast = reactive<Toast>({
       visible: false,

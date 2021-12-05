@@ -190,10 +190,6 @@ export default defineComponent({
     &.select-enter-from,
     &.select-leave-to {
       top: #{$height + 2 * $padding};
-      .object-container {
-        left: 40px;
-        opacity: 0;
-      }
     }
 
     .object-container {
@@ -203,8 +199,6 @@ export default defineComponent({
       background-color: #a0cfff;
       border-radius: 4px;
       margin-right: 16px;
-      transition: left 0.3s ease-out, opacity 0.3s ease-out;
-      will-change: left, opacity;
       transition-delay: 0.3s;
       cursor: pointer;
 
