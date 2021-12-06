@@ -10,6 +10,7 @@ import { Reticle } from "../models/Reticle.model";
 import { IdModelMeta } from "@/composables/idSystem/interfaces/IdModelMeta.interface.";
 import { EventDispatcher } from "ste-events";
 import { LightXRService } from "@/composables/webxr/services/LightXR.service";
+import { SessionService } from "@/composables/idSystem/services/Session.service";
 
 export enum SceneMode {
   SELECT,
@@ -52,7 +53,8 @@ export class SceneModeController implements SessionLifecycle {
     public sesionService: SessionXRService,
     public sceneService: SceneXRService,
     public hitTestService: HitTestXRService,
-    public lightService: LightXRService
+    public lightService: LightXRService,
+    public sessionService: SessionService
   ) {}
 
   public get mode() {
@@ -79,6 +81,8 @@ export class SceneModeController implements SessionLifecycle {
       } else {
         this.hitTestService.anchorObject(this.objectSelected);
       }
+      this.sessionService.saveScene(this.sceneService.scene);
+      //TODO: Unwrap group after session restore
     }
 
     this.objectSelected = null;

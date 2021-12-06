@@ -7,6 +7,7 @@
   />
   <RootOverlay
     @close="stopAR"
+    @loadScene="loadSavedScene"
     @delete="deleteModel"
     @select:model="selectModel"
     :models="models"
@@ -14,6 +15,7 @@
     :onSceneModeChange="onSceneModeChange"
     :progress="progress"
     :progressVisible="progressVisible"
+    :sceneAvailable="sceneAvailable"
   />
 </template>
 
@@ -60,6 +62,8 @@ export default defineComponent({
       onSessionEnd,
       onSessionStart,
       onSceneModeChange,
+      loadSavedScene,
+      sceneAvailable,
     } = useXR(toast);
 
     onMounted(async () => {
@@ -81,6 +85,8 @@ export default defineComponent({
       onSessionEnd,
       onSessionStart,
       onSceneModeChange,
+      loadSavedScene,
+      sceneAvailable,
       progress,
       progressVisible,
     };

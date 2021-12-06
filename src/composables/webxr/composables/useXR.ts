@@ -5,9 +5,11 @@ import Container from "typedi";
 import * as THREE from "three";
 import { IdModel } from "@/composables/idSystem/models/IdModel";
 import { Toast } from "../interfaces/Toast.interface";
+import { SessionService } from "@/composables/idSystem/services/Session.service";
 
 export function useXR(toast: Toast) {
   const idar = Container.get(IdarXR);
+  const sessionService = Container.get(SessionService);
   const isXrSupported = ref(false);
 
   return {
@@ -32,6 +34,15 @@ export function useXR(toast: Toast) {
     },
     async deleteModel() {
       idar.sceneModeController.setViewMode(true);
+    },
+    get sceneAvailable() {
+      return sessionService.isSceneSaved;
+    },
+    async loadSavedScene() {
+      const savedScene = await sessionService.getScene();
+      if (savedScene) {
+        idar.sceneModeController.setSelectMode(savedScene);
+      }
     },
   };
 }
