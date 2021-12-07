@@ -5,6 +5,7 @@ import {
 } from "../interfaces/SessionPersistance.interfaces";
 import * as THREE from "three";
 import { IdModelsService } from "./IdModels.service";
+import { IdModelMeta } from "../interfaces/IdModelMeta.interface.";
 
 @Service()
 export class SessionService implements SessionPersistance {
@@ -13,20 +14,30 @@ export class SessionService implements SessionPersistance {
   private readonly storageKey: string = "sceneModels";
 
   saveScene(scene: THREE.Scene): void {
-    //TODO: 1. Dla naszych modeli ustawiamy matrix względem środka cięzkości całej sceny, modyfikujemy tylko X i Y i ustawiamy je tak jakby 0.0 byłoby w środku pomiędyz wszystkimi modelami.
+    const loadedModels = scene.children.filter((c) => c.userData.meta);
 
-    const loadedObjects: SessionObject[] = [];
-    scene.children.forEach((object) => {
-      const objectId = object.userData.meta?.id;
-      if (objectId) {
-        loadedObjects.push({
-          modelId: objectId,
-          matrix: object.matrix.toArray(),
-        });
-      }
+    const gravityCenter = loadedModels.reduce((prev, next) => {
+      const position = new THREE.Vector3();
+      position.setFromMatrixPosition(next.matrix);
+      prev.add(position);
+      return prev;
+    }, new THREE.Vector3());
+
+    gravityCenter.setY(0);
+    gravityCenter.divideScalar(loadedModels.length);
+
+    const loadedObjects: SessionObject[] = loadedModels.map((model) => {
+      const position = new THREE.Vector3();
+      position.setFromMatrixPosition(model.matrix);
+      position.sub(gravityCenter);
+      const realtiveMatrix = model.matrix.clone().setPosition(position);
+      return {
+        modelId: model.userData.meta.id,
+        matrix: realtiveMatrix.toArray(),
+      };
     });
-    if (loadedObjects.length)
-      localStorage.setItem(this.storageKey, JSON.stringify(loadedObjects));
+
+    localStorage.setItem(this.storageKey, JSON.stringify(loadedObjects));
   }
 
   async getScene(): Promise<THREE.Group | null> {
@@ -36,7 +47,9 @@ export class SessionService implements SessionPersistance {
     }
     const objectsToLoad: SessionObject[] = JSON.parse(objectsJSON);
     const scene = new THREE.Group();
-    //TODO: Dodać metadane do scene tak jak dodawane do modelu w getModel (jako name Saved session, reszta empty (Partial interface))
+    scene.userData.meta = { name: "Saved session" } as Partial<IdModelMeta>;
+    scene.userData.panRotateY = 0;
+    scene.userData.isSavedGroup = true;
     scene.matrixAutoUpdate = false;
 
     const models = await Promise.all(
@@ -54,6 +67,11 @@ export class SessionService implements SessionPersistance {
   }
 
   get isSceneSaved(): boolean {
-    return !!localStorage.getItem(this.storageKey);
+    const objectsJSON = localStorage.getItem(this.storageKey);
+    if (!objectsJSON) {
+      return false;
+    }
+    const objectsToLoad: SessionObject[] = JSON.parse(objectsJSON);
+    return !!objectsToLoad.length;
   }
 }

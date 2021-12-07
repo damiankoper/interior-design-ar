@@ -68,21 +68,30 @@ export class SceneModeController implements SessionLifecycle {
     if (addToScene) {
       this.sceneService.scene.add(object);
     }
-    console.log(object);
-
     this._onSceneModeChange.dispatch(this._mode, this);
   }
 
   public setViewMode(removeFromScene = true) {
     if (this.objectSelected) {
-      if (removeFromScene) {
-        this.hitTestService.removeAnchor(this.objectSelected);
+      if (this.objectSelected.userData.isSavedGroup) {
         this.sceneService.scene.remove(this.objectSelected);
+        if (!removeFromScene) {
+          for (const loadedModel of [...this.objectSelected.children]) {
+            //TODO: When placing group from saved session, marker is not visible and objects are placed on each other (also they are a little bit further and way smaller)
+            loadedModel.matrix.multiply(this.objectSelected.matrix);
+            this.hitTestService.anchorObject(loadedModel);
+            this.sceneService.scene.add(loadedModel);
+          }
+        }
       } else {
-        this.hitTestService.anchorObject(this.objectSelected);
+        if (removeFromScene) {
+          this.hitTestService.removeAnchor(this.objectSelected);
+          this.sceneService.scene.remove(this.objectSelected);
+        } else {
+          this.hitTestService.anchorObject(this.objectSelected);
+        }
       }
       this.sessionService.saveScene(this.sceneService.scene);
-      //TODO: Unwrap group after session restore
     }
 
     this.objectSelected = null;
@@ -107,7 +116,6 @@ export class SceneModeController implements SessionLifecycle {
       switch (this._mode) {
         case SceneMode.VIEW: {
           const object = await this.getSelectedObject();
-          console.log(object);
 
           if (object) this.setSelectMode(object);
           break;
@@ -190,7 +198,6 @@ export class SceneModeController implements SessionLifecycle {
         .applyMatrix4(new THREE.Matrix4().extractRotation(c))
         .setY(0)
         .normalize();
-      console.log(direction);
 
       if (this.isInitialized) {
         const angle = Math.acos(direction.dot(this.gestureLastDirection));
