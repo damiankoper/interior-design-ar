@@ -4,14 +4,23 @@
     <div class="label">
       <h2 class="hidden-sm-and-down">{{ model.meta.name }}</h2>
       <h3 class="hidden-md-and-up">{{ model.meta.name }}</h3>
-      <el-button
-        @click.prevent.stop="onARClick"
-        :disabled="!isXrSupported"
-        type="primary"
-        plain
+      <el-tooltip
+        effect="dark"
+        content="AR not supported"
+        placement="left"
+        :disabled="isXrSupported"
       >
-        <font-awesome-icon :icon="['fas', 'vr-cardboard']" />
-      </el-button>
+        <div>
+          <el-button
+            @click.prevent.stop="onARClick"
+            :disabled="!isXrSupported"
+            type="primary"
+            plain
+          >
+            <font-awesome-icon :icon="['fas', 'vr-cardboard']" />
+          </el-button>
+        </div>
+      </el-tooltip>
     </div>
   </div>
 </template>

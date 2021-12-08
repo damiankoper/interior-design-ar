@@ -24,14 +24,23 @@
               >
                 <h1>{{ meta?.name }}</h1>
 
-                <el-button
-                  @click="onARClick"
-                  :disabled="!isXrSupported"
-                  type="primary"
-                  plain
+                <el-tooltip
+                  effect="dark"
+                  content="AR not supported"
+                  placement="left"
+                  :disabled="isXrSupported"
                 >
-                  <font-awesome-icon :icon="['fas', 'vr-cardboard']" />
-                </el-button>
+                  <div>
+                    <el-button
+                      @click="onARClick"
+                      :disabled="!isXrSupported"
+                      type="primary"
+                      plain
+                    >
+                      <font-awesome-icon :icon="['fas', 'vr-cardboard']" />
+                    </el-button>
+                  </div>
+                </el-tooltip>
               </el-row>
             </el-col>
             <el-col :span="24" class="desc" v-html="meta?.description" />
