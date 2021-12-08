@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <Header :useAutocomplete="true" />
+    <Header :modelName="meta?.name ?? ''" />
     <el-main v-if="model">
       <div class="model-details">
         <div ref="viewerRoot" class="viewer-root">
@@ -22,7 +22,7 @@
                 justify="space-between"
                 style="flex-wrap: nowrap; align-items: baseline"
               >
-                <h1>{{ meta.name }}</h1>
+                <h1>{{ meta?.name }}</h1>
 
                 <el-button
                   @click="onARClick"
@@ -34,7 +34,7 @@
                 </el-button>
               </el-row>
             </el-col>
-            <el-col :span="24" class="desc" v-html="meta.description" />
+            <el-col :span="24" class="desc" v-html="meta?.description" />
           </el-row>
         </div>
       </div>

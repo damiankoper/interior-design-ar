@@ -19,31 +19,11 @@
           </el-col>
         </el-row>
       </el-col>
-      <el-col :span="NaN" :md="5" :lg="5" :xl="5">
-        <el-autocomplete
-          v-if="useAutocomplete"
-          style="display: block"
-          placeholder="Search for model"
-          clearable
-          v-model="searchValue"
-          :fetch-suggestions="querySearch"
-          @select="onSelect"
-        >
-          <template #prefix>
-            <font-awesome-icon
-              style="margin-left: 5px"
-              :icon="['fas', 'search']"
-            />
-          </template>
-          <template #default="{ item }">
-            <div class="value">{{ item.name }}</div>
-          </template>
-        </el-autocomplete>
+      <el-col v-if="!modelName" :span="NaN" :md="5" :lg="5" :xl="5">
         <el-input
-          v-else
           placeholder="Search for model"
           clearable
-          v-model="searchValue"
+          v-model="filterValue"
           @input="onFilterInput"
         >
           <template #prefix>
@@ -54,20 +34,24 @@
           </template>
         </el-input>
       </el-col>
+      <el-col v-else class="hidden-sm-and-down" :span="NaN" :lg="14" :xl="9">
+        <h1>
+          {{ modelName }}
+        </h1>
+      </el-col>
     </el-row>
   </el-header>
 </template>
 
 <script lang="ts">
-import { defineComponent, computed } from "vue";
+import { defineComponent, ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { debounce } from "lodash";
 import { useWindowScroll } from "@/composables/useWindowScroll";
-import { useModelSearch } from "@/composables/useModelSearch";
 
 export default defineComponent({
   props: {
-    useAutocomplete: Boolean,
+    modelName: String,
   },
   emits: ["filterChange"],
   setup(props, { emit }) {
@@ -86,19 +70,16 @@ export default defineComponent({
       };
     });
 
-    const { searchValue, querySearch, onSelect } = useModelSearch();
-
-    const onFilterInput = debounce((searchValue) => {
-      emit("filterChange", searchValue);
+    const filterValue = ref("");
+    const onFilterInput = debounce((filter) => {
+      emit("filterChange", filter);
     }, 300);
 
     return {
       ...props,
       onBack,
       headerStyle,
-      searchValue,
-      querySearch,
-      onSelect,
+      filterValue,
       onFilterInput,
     };
   },
@@ -135,6 +116,12 @@ export default defineComponent({
       position: relative;
       left: -0.3rem;
     }
+  }
+
+  h1 {
+    font-size: 2.4rem;
+    margin: 0px;
+    text-align: right;
   }
 
   .no-link {

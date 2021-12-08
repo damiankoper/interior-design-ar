@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <Header :useAutocomplete="false" @filterChange="onFilterChange" />
+    <Header @filterChange="onFilterChange" />
     <el-main>
       <el-row :gutter="16">
         <el-col
