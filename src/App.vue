@@ -39,14 +39,18 @@ export default defineComponent({
     const sceneAvailable = ref(false);
     idModelsService.init([
       "SheenChair",
-      "Picture",
-      "Mirror",
-      /*       "Rug",
-      "Lamp",
-      "HangingMirror",
+      "BigSofa",
+      "SmallSofa",
+      "Chair",
+      "CoffeeTable",
       "Commode",
-      "CoffeTable",
-      "Closet", */
+      "Wardrobe",
+      "Rug",
+      "Painting",
+      "Lamp",
+      "LampDown",
+      "Mirror",
+      "HangingMirror",
     ]);
 
     const toast = reactive<Toast>({

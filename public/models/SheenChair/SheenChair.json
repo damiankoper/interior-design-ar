@@ -2,5 +2,6 @@
   "name": "Pergevö",
   "type": "Chair",
   "description": "<p>Nullam nulla eros, ultricies sit amet, nonummy id, imperdiet feugiat, pede. Nunc nec neque. Curabitur suscipit suscipit tellus. Quisque malesuada placerat nisl. Fusce convallis metus id felis luctus adipiscing.</p><p>Fusce fermentum odio nec arcu. Ut id nisl quis enim dignissim sagittis. Praesent ac sem eget est egestas volutpat. Praesent adipiscing. Phasellus gravida semper nisi. Fusce a quam. Praesent egestas neque eu enim. Morbi mollis tellus ac sapien. Nunc nonummy metus. Curabitur vestibulum aliquam leo. Aenean tellus metus, bibendum sed, posuere ac, mattis non, nunc. In auctor lobortis lacus. Praesent vestibulum dapibus nibh. Fusce pharetra convallis urna. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p><p>In hac habitasse platea dictumst. Praesent vestibulum dapibus nibh. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec venenatis vulputate lorem. Nullam quis ante. In ut quam vitae odio lacinia tincidunt. Praesent egestas neque eu enim. Proin faucibus arcu quis ante. Cras id dui. Donec venenatis vulputate lorem.</p>",
-  "castsShadow": true
+  "castsShadow": true,
+  "vertical": false
 }

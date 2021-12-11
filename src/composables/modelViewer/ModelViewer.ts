@@ -3,6 +3,7 @@ import * as THREE from "three";
 import { ServiceLifecycle } from "../webxr/interfaces/ServiceLifecycle.interface";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { IdModel } from "../idSystem/models/IdModel";
+import { LightProbeGenerator } from "three/examples/jsm/lights/LightProbeGenerator.js";
 
 const r = "https://threejs.org/examples/textures/cube/Bridge2/";
 const mapUrls = [
@@ -14,8 +15,9 @@ const mapUrls = [
   r + "negz.jpg",
 ];
 
-const textureCube = new THREE.CubeTextureLoader().load(mapUrls);
-textureCube.format = THREE.RGBFormat;
+const textureCube = new Promise<THREE.CubeTexture>((resolve, reject) => {
+  new THREE.CubeTextureLoader().load(mapUrls, resolve, undefined, reject);
+});
 
 @Service()
 export class ModelViewer implements ServiceLifecycle {
@@ -51,8 +53,7 @@ export class ModelViewer implements ServiceLifecycle {
 
     container.appendChild(this.renderer.domElement);
     window.addEventListener("resize", this.setSize.bind(this), false);
-
-    this.scene.environment = textureCube;
+    this.scene.environment = await textureCube;
   }
 
   public async destroy(): Promise<void> {
@@ -125,16 +126,18 @@ export class ModelViewer implements ServiceLifecycle {
     return camera;
   }
 
-  private initLights(scene: THREE.Scene) {
+  private async initLights(scene: THREE.Scene) {
     const dirLight1 = new THREE.DirectionalLight(0xffffff, 3);
     dirLight1.castShadow = true;
-    dirLight1.position.set(10, 10, 10);
+    dirLight1.position.set(3, 3, 3);
     dirLight1.target.position.set(0, 0, 0);
-    dirLight1.shadow.mapSize.set(2048, 2048);
+    dirLight1.shadow.mapSize.set(2048 * 2, 2048 * 2);
     scene.add(dirLight1);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
-    scene.add(ambientLight);
+    const lightProbe = new THREE.LightProbe();
+    lightProbe.copy(LightProbeGenerator.fromCubeTexture(await textureCube));
+    lightProbe.intensity = 1;
+    scene.add(lightProbe);
   }
 
   private initFloor(scene: THREE.Scene) {

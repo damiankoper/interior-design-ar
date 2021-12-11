@@ -137,7 +137,7 @@ export default defineComponent({
     text-align: left;
   }
 
-  p.desc {
+  .desc {
     text-align: justify;
   }
   .hidden {

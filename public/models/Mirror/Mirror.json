@@ -1,7 +1,7 @@
 {
-  "name": "Låonnohje",
-  "type":"Standing mirror",
-  "description": "<p>Mirror</p>",
-  "castsShadow": true,
-  "vertical": false
-}
+    "name": "Mirror Doppelganger",
+    "type":"Standing mirror",
+    "description": "<p>Duże, stojące, enigmatyczne lustro. Jeśli spojrzysz na odbicie to na bank ucieszysz się, że udało Ci się zrzucić kilka kilo, jednak jeśli oglądałeś drugą część Harrego Pottera to domyślasz się jak działa. Przestań się oszukiwać, już nigdy nie zejdziesz z wagą.</p>",
+    "castsShadow": true,
+    "vertical": false
+  }

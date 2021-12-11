@@ -32,6 +32,7 @@ export class LightXRService implements ServiceLifecycle {
     xrLight.addEventListener("estimationstart", () => {
       scene.add(xrLight);
       scene.remove(defaultLight);
+
       if (xrLight.environment) {
         /**
          * ! IMPORTANT: Three.js has to be locked at r130 because of a bug with
