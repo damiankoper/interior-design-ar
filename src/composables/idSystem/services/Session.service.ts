@@ -28,8 +28,7 @@ export class SessionService implements SessionPersistance {
 
     const loadedObjects: SessionObject[] = loadedModels.map((model) => {
       const position = new THREE.Vector3();
-      position.setFromMatrixPosition(model.matrix);
-      position.sub(gravityCenter);
+      position.setFromMatrixPosition(model.matrix).setY(0).sub(gravityCenter);
       const realtiveMatrix = model.matrix.clone().setPosition(position);
       return {
         modelId: model.userData.meta.id,

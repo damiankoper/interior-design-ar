@@ -65,9 +65,14 @@ export class SceneModeController implements SessionLifecycle {
     this._mode = SceneMode.SELECT;
     this.objectSelected = object;
     this.hitTestService.removeAnchor(this.objectSelected);
-    if (addToScene) {
-      this.sceneService.scene.add(object);
-    }
+    if (addToScene) this.sceneService.scene.add(object);
+
+    // Correct angle according to user's pose
+    const direction = this.getObjectDirection(this.sceneService.controller);
+    const modelDirection = this.getObjectDirection(object);
+    const angleSigned = this.getAngleSigned(direction, modelDirection);
+    this.objectSelected.userData.panRotateY = angleSigned;
+
     this._onSceneModeChange.dispatch(this._mode, this);
   }
 
@@ -77,10 +82,15 @@ export class SceneModeController implements SessionLifecycle {
         this.sceneService.scene.remove(this.objectSelected);
         if (!removeFromScene) {
           for (const loadedModel of [...this.objectSelected.children]) {
-            //TODO: When placing group from saved session, marker is not visible and objects are placed on each other (also they are a little bit further and way smaller)
-            loadedModel.matrix.multiply(this.objectSelected.matrix);
-            this.hitTestService.anchorObject(loadedModel);
             this.sceneService.scene.add(loadedModel);
+
+            // ! Object has to be anchored before premultiply
+            this.hitTestService.anchorObject(
+              loadedModel,
+              loadedModel.matrix.clone()
+            );
+
+            loadedModel.matrix.premultiply(this.objectSelected.matrix);
           }
         }
       } else {
@@ -163,16 +173,14 @@ export class SceneModeController implements SessionLifecycle {
     hitTestService.updateAnchors(frame, referenceSpace, this.objectSelected);
     const gestureTime = performance.now() - this.gestureStartTime;
 
+    this.reticle.update(frame, referenceSpace, hitTestService);
     switch (this._mode) {
       case SceneMode.VIEW:
-        this.reticle.show();
-        this.reticle.update(frame, referenceSpace, hitTestService);
         break;
 
       case SceneMode.SELECT:
         {
           if (!this.objectSelected) return;
-          this.reticle.hide();
           this.updateRotation(this.objectSelected, gestureTime);
 
           const matrix = hitTestService.getHitTransformMatrix(
@@ -191,27 +199,33 @@ export class SceneModeController implements SessionLifecycle {
   }
 
   private updateRotation(objectSelected: THREE.Object3D, gestureTime: number) {
-    const controller = this.sceneService.controller;
     if (this.isGesture && gestureTime >= this.tapMaxTime) {
-      const c = controller.matrixWorld;
-      const direction = new THREE.Vector3(0, 0, -1)
-        .applyMatrix4(new THREE.Matrix4().extractRotation(c))
-        .setY(0)
-        .normalize();
-
+      const direction = this.getObjectDirection(this.sceneService.controller);
       if (this.isInitialized) {
-        const angle = Math.acos(direction.dot(this.gestureLastDirection));
-        const cross = new THREE.Vector3().crossVectors(
+        const angleSigned = this.getAngleSigned(
           direction,
           this.gestureLastDirection
         );
-        const angleSigned =
-          angle * Math.sign(new THREE.Vector3(0, 1, 0).dot(cross));
         objectSelected.userData.panRotateY += angleSigned * 10;
       }
       this.gestureLastDirection.copy(direction);
       this.isInitialized = true;
     }
+  }
+
+  private getObjectDirection(object: THREE.Object3D) {
+    return new THREE.Vector3(0, 0, -1)
+      .applyMatrix4(new THREE.Matrix4().extractRotation(object.matrix))
+      .setY(0)
+      .normalize();
+  }
+
+  private getAngleSigned(from: THREE.Vector3, to: THREE.Vector3) {
+    const angle = Math.acos(from.dot(to));
+    const cross = new THREE.Vector3().crossVectors(from, to);
+    const angleSigned =
+      angle * Math.sign(new THREE.Vector3(0, 1, 0).dot(cross));
+    return angleSigned;
   }
 
   private updateSelectedObject(

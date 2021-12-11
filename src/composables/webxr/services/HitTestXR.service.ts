@@ -12,7 +12,7 @@ export class HitTestXRService implements ServiceLifecycle {
 
   private anchors = new Map<
     THREE.Object3D,
-    { object: THREE.Object3D; anchor: XRAnchor }
+    { object: THREE.Object3D; anchor: XRAnchor; transform?: THREE.Matrix4 }
   >();
 
   public get lastHitTestResult() {
@@ -47,12 +47,17 @@ export class HitTestXRService implements ServiceLifecycle {
     return null;
   }
 
-  public async anchorObject(object: THREE.Object3D) {
+  public async anchorObject(object: THREE.Object3D, transform?: THREE.Matrix4) {
     const hit = this.lastHitTestResult;
     if (hit && hit.createAnchor) {
       // Note: argument 0 is because of typings bug (no arguments requried)
       const anchor = await hit.createAnchor(0 as unknown as XRRigidTransform);
-      this.anchors.set(object, { object, anchor });
+
+      this.anchors.set(object, {
+        object,
+        anchor,
+        transform,
+      });
     }
   }
 
@@ -65,12 +70,13 @@ export class HitTestXRService implements ServiceLifecycle {
     referenceSpace: XRReferenceSpace,
     objectSelceted: THREE.Object3D | null
   ) {
-    for (const [object, { anchor }] of this.anchors) {
+    for (const [object, { anchor, transform }] of this.anchors) {
       if (frame.trackedAnchors?.has(anchor) && object !== objectSelceted) {
         const matrix = frame.getPose(anchor.anchorSpace, referenceSpace)
           ?.transform.matrix;
         if (matrix) {
           const matrixThree = new THREE.Matrix4().fromArray(matrix);
+          if (transform) matrixThree.multiply(transform);
           object.matrix.copy(matrixThree);
           object.matrix.multiply(
             new THREE.Matrix4().makeRotationY(object.userData.panRotateY)
