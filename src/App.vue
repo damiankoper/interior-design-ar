@@ -13,6 +13,7 @@
     :models="models"
     :toast="toast"
     :onSceneModeChange="onSceneModeChange"
+    :onSessionEnd="onSessionEnd"
     :progress="progress"
     :progressVisible="progressVisible"
     :sceneAvailable="sceneAvailable"
@@ -20,7 +21,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, onUnmounted, reactive } from "vue";
+import { defineComponent, onMounted, onUnmounted, reactive, ref } from "vue";
 
 import { IdModelsService } from "@/composables/idSystem/services/IdModels.service";
 import RootOverlay from "./components/overlay/RootOverlay.vue";
@@ -35,6 +36,7 @@ export default defineComponent({
     const { progress, progressVisible } = useModelsProgress(true);
 
     const idModelsService = Container.get(IdModelsService);
+    const sceneAvailable = ref(false);
     idModelsService.init([
       "SheenChair",
       "Picture",
@@ -62,12 +64,16 @@ export default defineComponent({
       onSessionEnd,
       onSessionStart,
       onSceneModeChange,
-      loadSavedScene,
-      sceneAvailable,
+      loadSavedScene: xrLoadSavedScene,
+      sceneAvailable: xrSceneAvailable,
     } = useXR(toast);
 
     onMounted(async () => {
       await getXRSupport();
+      sceneAvailable.value = xrSceneAvailable;
+      onSessionEnd.sub(() => {
+        sceneAvailable.value = xrSceneAvailable;
+      });
     });
 
     onUnmounted(() => {
@@ -85,10 +91,13 @@ export default defineComponent({
       onSessionEnd,
       onSessionStart,
       onSceneModeChange,
-      loadSavedScene,
-      sceneAvailable,
       progress,
       progressVisible,
+      loadSavedScene() {
+        sceneAvailable.value = false;
+        xrLoadSavedScene();
+      },
+      sceneAvailable,
     };
   },
 });

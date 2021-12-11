@@ -79,10 +79,16 @@ export class SceneModeController implements SessionLifecycle {
   public setViewMode(removeFromScene = true) {
     if (this.objectSelected) {
       if (this.objectSelected.userData.isSavedGroup) {
-        this.sceneService.scene.remove(this.objectSelected);
         if (!removeFromScene) {
+          this.objectSelected.updateMatrixWorld();
           for (const loadedModel of [...this.objectSelected.children]) {
             this.sceneService.scene.add(loadedModel);
+            const rotation = new THREE.Euler().setFromRotationMatrix(
+              this.objectSelected.matrix
+            );
+            loadedModel.matrix.premultiply(
+              new THREE.Matrix4().makeRotationY(rotation.y)
+            );
 
             // ! Object has to be anchored before premultiply
             this.hitTestService.anchorObject(
@@ -93,6 +99,7 @@ export class SceneModeController implements SessionLifecycle {
             loadedModel.matrix.premultiply(this.objectSelected.matrix);
           }
         }
+        this.sceneService.scene.remove(this.objectSelected);
       } else {
         if (removeFromScene) {
           this.hitTestService.removeAnchor(this.objectSelected);

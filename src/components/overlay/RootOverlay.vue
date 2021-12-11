@@ -100,6 +100,7 @@ import {
 } from "@/composables/webxr/domains/selectMode/controllers/SceneMode.controller";
 import { Toast } from "@/composables/webxr/interfaces/Toast.interface";
 import { EventDispatcher } from "ste-events";
+import { SignalDispatcher } from "ste-signals";
 import { defineComponent, onMounted, onUnmounted, PropType, ref } from "vue";
 
 export default defineComponent({
@@ -112,6 +113,10 @@ export default defineComponent({
     models: { type: Array as PropType<IdModel[]>, required: true },
     onSceneModeChange: {
       type: Object as PropType<EventDispatcher<SceneMode, SceneModeController>>,
+      required: true,
+    },
+    onSessionEnd: {
+      type: Object as PropType<SignalDispatcher>,
       required: true,
     },
   },
@@ -137,6 +142,7 @@ export default defineComponent({
           }
         )
       );
+      events.push(props.onSessionEnd.sub(() => (objectMenu.value = false)));
     });
 
     onUnmounted(() => {
