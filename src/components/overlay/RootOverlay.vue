@@ -22,7 +22,11 @@
         </el-button>
         <transition name="el-fade-in">
           <div class="model-info" v-if="selectedModelMeta || progressVisible">
-            {{ progressVisible ? "Loading..." : selectedModelMeta.name }}
+            <template v-if="progressVisible"> Loading... </template>
+            <template v-else>
+              <div class="type">{{ selectedModelMeta.type }}</div>
+              {{ selectedModelMeta.name }}
+            </template>
           </div>
         </transition>
         <div>
@@ -228,8 +232,13 @@ export default defineComponent({
     margin: 0 24px;
     flex: 1;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center;
+    .type {
+      font-size: 10px;
+    }
   }
 }
 </style>
