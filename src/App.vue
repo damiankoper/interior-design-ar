@@ -34,15 +34,19 @@ export default defineComponent({
 
     const idModelsService = Container.get(IdModelsService);
     idModelsService.init([
-      "SheenChair",
-      "Picture",
-      "Mirror",
-      /*       "Rug",
-      "Lamp",
-      "HangingMirror",
+      // "SheenChair",
+      "BigSofa",
+      "SmallSofa",
+      "Chair",
+      "CoffeeTable",
       "Commode",
-      "CoffeTable",
-      "Closet", */
+      "Wardrobe",
+      "Rug",
+      "Painting",
+      "Lamp",
+      "LampDown",
+      "Mirror",
+      "HangingMirror"
     ]);
 
     const toast = reactive<Toast>({
