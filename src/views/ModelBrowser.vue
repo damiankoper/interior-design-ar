@@ -2,7 +2,7 @@
   <el-container>
     <Header @filterChange="onFilterChange" />
     <el-main>
-      <el-row :gutter="16">
+      <el-row :gutter="8">
         <el-col
           :span="6"
           :xs="12"
@@ -54,7 +54,8 @@ export default defineComponent({
         .filter(
           (model) =>
             !filter.value ||
-            model.meta.name?.toLowerCase().includes(filter.value)
+            model.meta.name?.toLowerCase().includes(filter.value) ||
+            model.meta.type?.toLowerCase().includes(filter.value)
         );
     });
 
@@ -77,7 +78,7 @@ export default defineComponent({
   min-height: 100vh;
 
   .model-tile {
-    margin-bottom: 16px;
+    margin-bottom: 8px;
   }
 }
 </style>

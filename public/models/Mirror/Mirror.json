@@ -1,5 +1,6 @@
 {
-  "name": "Standing mirror",
+  "name": "Låonnohje",
+  "type":"Standing mirror",
   "description": "<p>Mirror</p>",
   "castsShadow": true,
   "vertical": false

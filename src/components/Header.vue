@@ -19,7 +19,7 @@
           </el-col>
         </el-row>
       </el-col>
-      <el-col v-if="!modelName" :span="NaN" :md="5" :lg="5" :xl="5">
+      <el-col v-if="!modelMeta" :span="NaN" :md="5" :lg="5" :xl="5">
         <el-input
           placeholder="Search for model"
           clearable
@@ -34,24 +34,31 @@
           </template>
         </el-input>
       </el-col>
-      <el-col v-else class="hidden-sm-and-down" :span="NaN" :lg="14" :xl="9">
-        <h1>
-          {{ modelName }}
-        </h1>
+      <el-col v-else :span="NaN">
+        <div style="font-size: 12px; text-align: right">
+          {{ modelMeta.type }}
+        </div>
+        <h2 style="margin-top: 0px">
+          {{ modelMeta.name }}
+        </h2>
       </el-col>
     </el-row>
   </el-header>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from "vue";
+import { defineComponent, ref, computed, PropType } from "vue";
 import { useRouter } from "vue-router";
 import { debounce } from "lodash";
 import { useWindowScroll } from "@/composables/useWindowScroll";
+import { IdModelMeta } from "@/composables/idSystem/interfaces/IdModelMeta.interface.";
 
 export default defineComponent({
   props: {
-    modelName: String,
+    modelMeta: {
+      type: Object as PropType<IdModelMeta>,
+      required: false,
+    },
   },
   emits: ["filterChange"],
   setup(props, { emit }) {

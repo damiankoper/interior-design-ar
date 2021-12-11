@@ -2,8 +2,11 @@
   <div class="model-tile" @click="openModelDetails()">
     <el-image fit="contain" :src="imageSrc" />
     <div class="label">
-      <h2 class="hidden-sm-and-down">{{ model.meta.name }}</h2>
-      <h3 class="hidden-md-and-up">{{ model.meta.name }}</h3>
+      <div>
+        <div class="type">{{ model.meta.type }}</div>
+        <div class="name hidden-sm-and-down">{{ model.meta.name }}</div>
+        <div class="name hidden-md-and-up">{{ model.meta.name }}</div>
+      </div>
       <el-tooltip
         effect="dark"
         content="AR not supported"
@@ -16,6 +19,7 @@
             :disabled="!isXrSupported"
             type="primary"
             plain
+            size="small"
           >
             <font-awesome-icon :icon="['fas', 'vr-cardboard']" />
           </el-button>
@@ -97,15 +101,17 @@ export default defineComponent({
     align-items: center;
     padding: 8px;
 
-    h2,
-    h3 {
-      margin: 0;
+    .name {
+      font-weight: bold;
+    }
+    .type {
+      font-size: 12px;
     }
 
     .el-button {
-      padding: 6px 10.25px;
+      padding: 3px 7.75px;
       margin-left: 4px;
-      height: 40px;
+      width: 32px;
     }
   }
 

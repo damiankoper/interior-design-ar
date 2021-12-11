@@ -26,6 +26,7 @@ export class IdModel {
       thumbnailPath: `/models/${id}/${id}.png`,
       webGlModelPath: `/models/${id}/${id}.glb`,
       name: null,
+      type: null,
       description: null,
       castsShadow: false,
       vertical: false,
@@ -36,6 +37,7 @@ export class IdModel {
   public async initExtendedMeta() {
     const response = await axios.get(this.meta.extendedMetaPath);
     this.meta.name = response.data.name;
+    this.meta.type = response.data.type;
     this.meta.description = response.data.description;
     this.meta.castsShadow = response.data.castsShadow;
     this.meta.vertical = response.data.vertical;

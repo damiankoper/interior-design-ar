@@ -99,7 +99,7 @@ body {
   color: #2c3e50;
 
   .el-main {
-    --el-main-padding: 72px 12px 48px;
+    --el-main-padding: 68px 8px 48px;
     @media only screen and (min-width: 1200px) {
       --el-main-padding: 72px 250px 48px;
     }

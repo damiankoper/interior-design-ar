@@ -1,6 +1,6 @@
 <template>
   <el-container>
-    <Header :modelName="meta?.name ?? ''" />
+    <Header :model-meta="meta" />
     <el-main v-if="model">
       <div class="model-details">
         <div ref="viewerRoot" class="viewer-root">
@@ -20,10 +20,12 @@
             <el-col :span="24">
               <el-row
                 justify="space-between"
-                style="flex-wrap: nowrap; align-items: baseline"
+                style="flex-wrap: nowrap; align-items: flex-start"
               >
-                <h1>{{ meta?.name }}</h1>
-
+                <div>
+                  <div style="font-size: 12px">{{ meta?.type }}</div>
+                  <h1 style="margin-top: 0px">{{ meta?.name }}</h1>
+                </div>
                 <el-tooltip
                   effect="dark"
                   content="AR not supported"
