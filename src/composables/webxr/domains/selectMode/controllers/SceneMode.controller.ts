@@ -10,6 +10,7 @@ import { Reticle } from "../models/Reticle.model";
 import { IdModelMeta } from "@/composables/idSystem/interfaces/IdModelMeta.interface.";
 import { EventDispatcher } from "ste-events";
 import { LightXRService } from "@/composables/webxr/services/LightXR.service";
+import { SessionService } from "@/composables/idSystem/services/Session.service";
 
 export enum SceneMode {
   SELECT,
@@ -52,7 +53,8 @@ export class SceneModeController implements SessionLifecycle {
     public sesionService: SessionXRService,
     public sceneService: SceneXRService,
     public hitTestService: HitTestXRService,
-    public lightService: LightXRService
+    public lightService: LightXRService,
+    public sessionService: SessionService
   ) {}
 
   public get mode() {
@@ -66,19 +68,30 @@ export class SceneModeController implements SessionLifecycle {
     if (addToScene) {
       this.sceneService.scene.add(object);
     }
-    console.log(object);
-
     this._onSceneModeChange.dispatch(this._mode, this);
   }
 
   public setViewMode(removeFromScene = true) {
     if (this.objectSelected) {
-      if (removeFromScene) {
-        this.hitTestService.removeAnchor(this.objectSelected);
+      if (this.objectSelected.userData.isSavedGroup) {
         this.sceneService.scene.remove(this.objectSelected);
+        if (!removeFromScene) {
+          for (const loadedModel of [...this.objectSelected.children]) {
+            //TODO: When placing group from saved session, marker is not visible and objects are placed on each other (also they are a little bit further and way smaller)
+            loadedModel.matrix.multiply(this.objectSelected.matrix);
+            this.hitTestService.anchorObject(loadedModel);
+            this.sceneService.scene.add(loadedModel);
+          }
+        }
       } else {
-        this.hitTestService.anchorObject(this.objectSelected);
+        if (removeFromScene) {
+          this.hitTestService.removeAnchor(this.objectSelected);
+          this.sceneService.scene.remove(this.objectSelected);
+        } else {
+          this.hitTestService.anchorObject(this.objectSelected);
+        }
       }
+      this.sessionService.saveScene(this.sceneService.scene);
     }
 
     this.objectSelected = null;
@@ -103,7 +116,6 @@ export class SceneModeController implements SessionLifecycle {
       switch (this._mode) {
         case SceneMode.VIEW: {
           const object = await this.getSelectedObject();
-          console.log(object);
 
           if (object) this.setSelectMode(object);
           break;
@@ -186,7 +198,6 @@ export class SceneModeController implements SessionLifecycle {
         .applyMatrix4(new THREE.Matrix4().extractRotation(c))
         .setY(0)
         .normalize();
-      console.log(direction);
 
       if (this.isInitialized) {
         const angle = Math.acos(direction.dot(this.gestureLastDirection));

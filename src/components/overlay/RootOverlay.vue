@@ -28,7 +28,7 @@
         <div>
           <el-button
             type="primary"
-            v-if="sceneAvailable"
+            v-if="sceneAvailable && objectMenu"
             @click="$emit('loadScene')"
             @beforexrselect.prevent
           >
@@ -111,7 +111,7 @@ export default defineComponent({
       required: true,
     },
   },
-  emits: ["close", "delete", "select:model"],
+  emits: ["close", "loadScene", "delete", "select:model"],
   setup(props) {
     const objectMenu = ref(false);
     const objectMenuDelete = ref(false);
