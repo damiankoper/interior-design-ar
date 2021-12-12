@@ -65,14 +65,16 @@ export class IdModel {
     if (shadow === "real")
       model.traverse((obj) => {
         obj.castShadow = true;
+        obj.receiveShadow = true;
       });
     if (shadow === "simple" && this.meta.castsShadow && shadow)
       this.addShadow(model);
 
     model.traverse((obj) => {
       if (obj instanceof THREE.Mesh) {
-        if (obj.userData.castShadows) obj.castShadow = true;
-        if (obj.userData.receiveShadow) obj.receiveShadow = true;
+        if (obj.material.userData.transparent) {
+          obj.material.transparent = true;
+        }
       }
     });
 

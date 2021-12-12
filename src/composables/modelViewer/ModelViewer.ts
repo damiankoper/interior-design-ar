@@ -34,6 +34,7 @@ export class ModelViewer implements ServiceLifecycle {
 
   constructor() {
     this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0xecf5ff);
     this.renderer = this.initRenderer();
     this.camera = this.initCamera();
     this.controls = this.initControls(this.camera, this.renderer);
@@ -108,7 +109,7 @@ export class ModelViewer implements ServiceLifecycle {
   private initRenderer() {
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
-      alpha: true,
+      alpha: false,
     });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
@@ -132,6 +133,7 @@ export class ModelViewer implements ServiceLifecycle {
     dirLight1.position.set(3, 3, 3);
     dirLight1.target.position.set(0, 0, 0);
     dirLight1.shadow.mapSize.set(2048 * 2, 2048 * 2);
+    dirLight1.shadow.bias = -0.00005;
     scene.add(dirLight1);
 
     const lightProbe = new THREE.LightProbe();
